@@ -34,7 +34,7 @@ const Navbar: React.FC = () => {
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
-                <span>Dashboard</span>
+                <span>Panel</span>
               </button>
               
               <button
@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
                 }`}
               >
                 <Database className="w-4 h-4" />
-                <span>Data Entry</span>
+                <span>Veri Girişi</span>
               </button>
               
               <button
@@ -58,7 +58,7 @@ const Navbar: React.FC = () => {
                 }`}
               >
                 <FileText className="w-4 h-4" />
-                <span>Reports</span>
+                <span>Raporlar</span>
               </button>
             </div>
           </div>
