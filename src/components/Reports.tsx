@@ -49,27 +49,27 @@ const Reports: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
-        <p className="text-gray-600">Generate comprehensive reports from your data</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Raporlar & Analizler</h1>
+        <p className="text-gray-600">Verilerinizden kapsamlı raporlar oluşturun</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Quick Summary</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Hızlı Özet</h3>
             <TrendingUp className="w-5 h-5 text-blue-500" />
           </div>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Total Platforms</span>
+              <span className="text-sm text-gray-600">Toplam Platform</span>
               <span className="font-semibold">{summary.totalPlatforms}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Total Followers</span>
+              <span className="text-sm text-gray-600">Toplam Takipçi</span>
               <span className="font-semibold">{summary.totalFollowers.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Avg Engagement</span>
+              <span className="text-sm text-gray-600">Ortalama Etkileşim</span>
               <span className="font-semibold">{summary.avgEngagementRate}%</span>
             </div>
           </div>
@@ -77,28 +77,28 @@ const Reports: React.FC = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Filtreler</h3>
             <Filter className="w-5 h-5 text-purple-500" />
           </div>
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Report Type
+                Rapor Türü
               </label>
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               >
-                <option value="all">All Data</option>
-                <option value="platform">Social Media</option>
-                <option value="website">Website</option>
-                <option value="news">News Coverage</option>
+                <option value="all">Tüm Veriler</option>
+                <option value="platform">Sosyal Medya</option>
+                <option value="website">Web Sitesi</option>
+                <option value="news">Haber Kapsamı</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Month
+                Ay
               </label>
               <input
                 type="month"
@@ -112,7 +112,7 @@ const Reports: React.FC = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Export Options</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Dışa Aktarma Seçenekleri</h3>
             <Download className="w-5 h-5 text-green-500" />
           </div>
           <div className="space-y-3">
@@ -120,31 +120,31 @@ const Reports: React.FC = () => {
               onClick={handleExportReport}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
-              Export JSON
+              JSON Aktar
             </button>
             <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">
-              Export PDF
+              PDF Aktar
             </button>
             <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors text-sm">
-              Export Excel
+              Excel Aktar
             </button>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Schedule</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Zamanlama</h3>
             <Calendar className="w-5 h-5 text-orange-500" />
           </div>
           <div className="space-y-3">
             <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-              Weekly Report
+              Haftalık Rapor
             </button>
             <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-              Monthly Report
+              Aylık Rapor
             </button>
             <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-              Quarterly Report
+              Üç Aylık Rapor
             </button>
           </div>
         </div>
@@ -152,7 +152,7 @@ const Reports: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Performance</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Performansı</h3>
           <div className="space-y-4">
             {platformData.map((platform) => (
               <div key={platform.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -162,7 +162,7 @@ const Reports: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-semibold text-gray-900">{platform.metrics.followers.toLocaleString()}</p>
-                  <p className="text-sm text-gray-600">followers</p>
+                  <p className="text-sm text-gray-600">takipçi</p>
                 </div>
               </div>
             ))}
@@ -170,17 +170,17 @@ const Reports: React.FC = () => {
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Website Analytics</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Web Sitesi Analitiği</h3>
           <div className="space-y-4">
             {websiteData.map((website) => (
               <div key={website.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900">Website Traffic</p>
+                  <p className="font-medium text-gray-900">Web Sitesi Trafiği</p>
                   <p className="text-sm text-gray-600">{website.month} {website.year}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-semibold text-gray-900">{website.visitors.toLocaleString()}</p>
-                  <p className="text-sm text-gray-600">visitors</p>
+                  <p className="text-sm text-gray-600">ziyaretçi</p>
                 </div>
               </div>
             ))}
@@ -190,7 +190,7 @@ const Reports: React.FC = () => {
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Detailed Report</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Detaylı Rapor</h3>
           <BarChart className="w-5 h-5 text-blue-500" />
         </div>
         
@@ -198,11 +198,11 @@ const Reports: React.FC = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Date</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">Tarih</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-900">Platform</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Metric</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Value</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Entered By</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">Metrik</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">Değer</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">Ekleyen</th>
               </tr>
             </thead>
             <tbody>
@@ -210,7 +210,7 @@ const Reports: React.FC = () => {
                 <tr key={platform.id} className="border-b border-gray-100">
                   <td className="py-3 px-4 text-sm text-gray-900">{platform.month} {platform.year}</td>
                   <td className="py-3 px-4 text-sm text-gray-900">{platform.platform}</td>
-                  <td className="py-3 px-4 text-sm text-gray-900">Followers</td>
+                  <td className="py-3 px-4 text-sm text-gray-900">Takipçi</td>
                   <td className="py-3 px-4 text-sm text-gray-900">{platform.metrics.followers.toLocaleString()}</td>
                   <td className="py-3 px-4 text-sm text-gray-900">{platform.enteredBy}</td>
                 </tr>
