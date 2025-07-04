@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Save, Plus, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const DataEntry: React.FC = () => {
   const { user, addPlatformData, addWebsiteData, addNewsData } = useApp();
   const [activeTab, setActiveTab] = useState<'platform' | 'website' | 'news'>('platform');
+  const [platform, setPlatform] = useState('');
+  const [value, setValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const [platformForm, setPlatformForm] = useState({
     platform: '',
@@ -35,36 +41,46 @@ const DataEntry: React.FC = () => {
     month: new Date().toISOString().slice(0, 7),
   });
 
-  const handlePlatformSubmit = (e: React.FormEvent) => {
+  const handlePlatformSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     const [year, month] = platformForm.month.split('-');
-    addPlatformData({
-      platform: platformForm.platform,
-      metrics: {
-        followers: parseInt(platformForm.followers),
-        engagement: parseInt(platformForm.engagement),
-        reach: parseInt(platformForm.reach),
-        impressions: parseInt(platformForm.impressions),
-        clicks: parseInt(platformForm.clicks),
-        conversions: parseInt(platformForm.conversions),
-      },
-      month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
-      year: parseInt(year),
-      enteredBy: user.name,
-    });
-
-    setPlatformForm({
-      platform: '',
-      followers: '',
-      engagement: '',
-      reach: '',
-      impressions: '',
-      clicks: '',
-      conversions: '',
-      month: new Date().toISOString().slice(0, 7),
-    });
+    try {
+      await addDoc(collection(db, 'istatistikler'), {
+        platform: platformForm.platform,
+        value: Number(platformForm.followers),
+        createdAt: new Date(parseInt(year), parseInt(month) - 1),
+      });
+      addPlatformData({
+        platform: platformForm.platform,
+        metrics: {
+          followers: parseInt(platformForm.followers),
+          engagement: parseInt(platformForm.engagement),
+          reach: parseInt(platformForm.reach),
+          impressions: parseInt(platformForm.impressions),
+          clicks: parseInt(platformForm.clicks),
+          conversions: parseInt(platformForm.conversions),
+        },
+        month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
+        year: parseInt(year),
+        enteredBy: user.name,
+      });
+      setPlatformForm({
+        platform: '',
+        followers: '',
+        engagement: '',
+        reach: '',
+        impressions: '',
+        clicks: '',
+        conversions: '',
+        month: new Date().toISOString().slice(0, 7),
+      });
+      setSuccess(true);
+    } catch (err) {
+      alert('Kayıt başarısız!');
+    }
+    setLoading(false);
   };
 
   const handleWebsiteSubmit = (e: React.FormEvent) => {
@@ -145,6 +161,25 @@ const DataEntry: React.FC = () => {
       ...newsForm,
       topSources: newsForm.topSources.filter((_, i) => i !== index)
     });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+    try {
+      await addDoc(collection(db, 'istatistikler'), {
+        platform,
+        value: Number(value),
+        createdAt: new Date(),
+      });
+      setSuccess(true);
+      setPlatform('');
+      setValue('');
+    } catch (err) {
+      alert('Kayıt başarısız!');
+    }
+    setLoading(false);
   };
 
   return (
@@ -572,6 +607,33 @@ const DataEntry: React.FC = () => {
           )}
         </div>
       </div>
+
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white rounded shadow mt-8">
+        <h2 className="text-xl font-bold mb-4">İstatistik Girişi</h2>
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Platform (örn: Instagram)"
+          value={platform}
+          onChange={e => setPlatform(e.target.value)}
+          required
+        />
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Değer (örn: 12345)"
+          type="number"
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          required
+        />
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+          disabled={loading}
+        >
+          {loading ? 'Kaydediliyor...' : 'Kaydet'}
+        </button>
+        {success && <div className="text-green-600 mt-2">Kayıt başarılı!</div>}
+      </form>
     </div>
   );
 };
