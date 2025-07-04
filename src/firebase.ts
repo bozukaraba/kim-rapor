@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // TODO: Buraya kendi Firebase config bilgilerinizi ekleyin
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyDLDqzEYnBd6_2pqMKzDqNzXCG9xXJaLHQ",
+  authDomain: "kimrapor.firebaseapp.com",
+  projectId: "kimrapor",
+  storageBucket: "kimrapor.firebasestorage.app",
+  messagingSenderId: "457066848242",
+  appId: "1:457066848242:web:72f711ffd6c7ba5e3d156b"
 };
 
 const app = initializeApp(firebaseConfig);
