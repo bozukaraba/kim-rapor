@@ -1,0 +1,579 @@
+import React, { useState } from 'react';
+import { Save, Plus, X } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+
+const DataEntry: React.FC = () => {
+  const { user, addPlatformData, addWebsiteData, addNewsData } = useApp();
+  const [activeTab, setActiveTab] = useState<'platform' | 'website' | 'news'>('platform');
+
+  const [platformForm, setPlatformForm] = useState({
+    platform: '',
+    followers: '',
+    engagement: '',
+    reach: '',
+    impressions: '',
+    clicks: '',
+    conversions: '',
+    month: new Date().toISOString().slice(0, 7),
+  });
+
+  const [websiteForm, setWebsiteForm] = useState({
+    visitors: '',
+    pageViews: '',
+    bounceRate: '',
+    avgSessionDuration: '',
+    conversions: '',
+    topPages: [''],
+    month: new Date().toISOString().slice(0, 7),
+  });
+
+  const [newsForm, setNewsForm] = useState({
+    mentions: '',
+    sentiment: 'neutral' as const,
+    reach: '',
+    topSources: [''],
+    month: new Date().toISOString().slice(0, 7),
+  });
+
+  const handlePlatformSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const [year, month] = platformForm.month.split('-');
+    addPlatformData({
+      platform: platformForm.platform,
+      metrics: {
+        followers: parseInt(platformForm.followers),
+        engagement: parseInt(platformForm.engagement),
+        reach: parseInt(platformForm.reach),
+        impressions: parseInt(platformForm.impressions),
+        clicks: parseInt(platformForm.clicks),
+        conversions: parseInt(platformForm.conversions),
+      },
+      month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
+      year: parseInt(year),
+      enteredBy: user.name,
+    });
+
+    setPlatformForm({
+      platform: '',
+      followers: '',
+      engagement: '',
+      reach: '',
+      impressions: '',
+      clicks: '',
+      conversions: '',
+      month: new Date().toISOString().slice(0, 7),
+    });
+  };
+
+  const handleWebsiteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const [year, month] = websiteForm.month.split('-');
+    addWebsiteData({
+      visitors: parseInt(websiteForm.visitors),
+      pageViews: parseInt(websiteForm.pageViews),
+      bounceRate: parseFloat(websiteForm.bounceRate),
+      avgSessionDuration: parseFloat(websiteForm.avgSessionDuration),
+      conversions: parseInt(websiteForm.conversions),
+      topPages: websiteForm.topPages.filter(page => page.trim() !== ''),
+      month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
+      year: parseInt(year),
+      enteredBy: user.name,
+    });
+
+    setWebsiteForm({
+      visitors: '',
+      pageViews: '',
+      bounceRate: '',
+      avgSessionDuration: '',
+      conversions: '',
+      topPages: [''],
+      month: new Date().toISOString().slice(0, 7),
+    });
+  };
+
+  const handleNewsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const [year, month] = newsForm.month.split('-');
+    addNewsData({
+      mentions: parseInt(newsForm.mentions),
+      sentiment: newsForm.sentiment,
+      reach: parseInt(newsForm.reach),
+      topSources: newsForm.topSources.filter(source => source.trim() !== ''),
+      month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
+      year: parseInt(year),
+      enteredBy: user.name,
+    });
+
+    setNewsForm({
+      mentions: '',
+      sentiment: 'neutral',
+      reach: '',
+      topSources: [''],
+      month: new Date().toISOString().slice(0, 7),
+    });
+  };
+
+  const addTopPage = () => {
+    setWebsiteForm({
+      ...websiteForm,
+      topPages: [...websiteForm.topPages, '']
+    });
+  };
+
+  const removeTopPage = (index: number) => {
+    setWebsiteForm({
+      ...websiteForm,
+      topPages: websiteForm.topPages.filter((_, i) => i !== index)
+    });
+  };
+
+  const addTopSource = () => {
+    setNewsForm({
+      ...newsForm,
+      topSources: [...newsForm.topSources, '']
+    });
+  };
+
+  const removeTopSource = (index: number) => {
+    setNewsForm({
+      ...newsForm,
+      topSources: newsForm.topSources.filter((_, i) => i !== index)
+    });
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Entry</h1>
+        <p className="text-gray-600">Enter monthly statistics for reporting and analysis</p>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('platform')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'platform' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Social Media Platforms
+            </button>
+            <button
+              onClick={() => setActiveTab('website')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'website' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Website Analytics
+            </button>
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'news' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              News Coverage
+            </button>
+          </nav>
+        </div>
+
+        <div className="p-6">
+          {activeTab === 'platform' && (
+            <form onSubmit={handlePlatformSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Platform
+                  </label>
+                  <select
+                    value={platformForm.platform}
+                    onChange={(e) => setPlatformForm({...platformForm, platform: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select platform</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Twitter">Twitter</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="TikTok">TikTok</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Month
+                  </label>
+                  <input
+                    type="month"
+                    value={platformForm.month}
+                    onChange={(e) => setPlatformForm({...platformForm, month: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Followers
+                  </label>
+                  <input
+                    type="number"
+                    value={platformForm.followers}
+                    onChange={(e) => setPlatformForm({...platformForm, followers: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Engagement
+                  </label>
+                  <input
+                    type="number"
+                    value={platformForm.engagement}
+                    onChange={(e) => setPlatformForm({...platformForm, engagement: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reach
+                  </label>
+                  <input
+                    type="number"
+                    value={platformForm.reach}
+                    onChange={(e) => setPlatformForm({...platformForm, reach: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Impressions
+                  </label>
+                  <input
+                    type="number"
+                    value={platformForm.impressions}
+                    onChange={(e) => setPlatformForm({...platformForm, impressions: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Clicks
+                  </label>
+                  <input
+                    type="number"
+                    value={platformForm.clicks}
+                    onChange={(e) => setPlatformForm({...platformForm, clicks: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Conversions
+                  </label>
+                  <input
+                    type="number"
+                    value={platformForm.conversions}
+                    onChange={(e) => setPlatformForm({...platformForm, conversions: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Platform Data</span>
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'website' && (
+            <form onSubmit={handleWebsiteSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Month
+                  </label>
+                  <input
+                    type="month"
+                    value={websiteForm.month}
+                    onChange={(e) => setWebsiteForm({...websiteForm, month: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Visitors
+                  </label>
+                  <input
+                    type="number"
+                    value={websiteForm.visitors}
+                    onChange={(e) => setWebsiteForm({...websiteForm, visitors: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Page Views
+                  </label>
+                  <input
+                    type="number"
+                    value={websiteForm.pageViews}
+                    onChange={(e) => setWebsiteForm({...websiteForm, pageViews: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bounce Rate (%)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={websiteForm.bounceRate}
+                    onChange={(e) => setWebsiteForm({...websiteForm, bounceRate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Avg Session Duration (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={websiteForm.avgSessionDuration}
+                    onChange={(e) => setWebsiteForm({...websiteForm, avgSessionDuration: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Conversions
+                  </label>
+                  <input
+                    type="number"
+                    value={websiteForm.conversions}
+                    onChange={(e) => setWebsiteForm({...websiteForm, conversions: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Top Pages
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addTopPage}
+                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Page</span>
+                  </button>
+                </div>
+                {websiteForm.topPages.map((page, index) => (
+                  <div key={index} className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="text"
+                      value={page}
+                      onChange={(e) => {
+                        const newPages = [...websiteForm.topPages];
+                        newPages[index] = e.target.value;
+                        setWebsiteForm({...websiteForm, topPages: newPages});
+                      }}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Page URL or title"
+                    />
+                    {websiteForm.topPages.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeTopPage(index)}
+                        className="p-2 text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Website Data</span>
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'news' && (
+            <form onSubmit={handleNewsSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Month
+                  </label>
+                  <input
+                    type="month"
+                    value={newsForm.month}
+                    onChange={(e) => setNewsForm({...newsForm, month: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sentiment
+                  </label>
+                  <select
+                    value={newsForm.sentiment}
+                    onChange={(e) => setNewsForm({...newsForm, sentiment: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="positive">Positive</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="negative">Negative</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mentions
+                  </label>
+                  <input
+                    type="number"
+                    value={newsForm.mentions}
+                    onChange={(e) => setNewsForm({...newsForm, mentions: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reach
+                  </label>
+                  <input
+                    type="number"
+                    value={newsForm.reach}
+                    onChange={(e) => setNewsForm({...newsForm, reach: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Top Sources
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addTopSource}
+                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Source</span>
+                  </button>
+                </div>
+                {newsForm.topSources.map((source, index) => (
+                  <div key={index} className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="text"
+                      value={source}
+                      onChange={(e) => {
+                        const newSources = [...newsForm.topSources];
+                        newSources[index] = e.target.value;
+                        setNewsForm({...newsForm, topSources: newSources});
+                      }}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="News source name"
+                    />
+                    {newsForm.topSources.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeTopSource(index)}
+                        className="p-2 text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save News Data</span>
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DataEntry;
