@@ -61,41 +61,93 @@ const Reports: React.FC = () => {
     return d >= s && d <= e;
   }
 
+  function getDate(val: any) {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    if (typeof val === 'string' || typeof val === 'number') return new Date(val);
+    return new Date();
+  }
+
   // Filtreleme fonksiyonu
   const filteredPlatformData = platformData.filter((item) => {
+    const itemDate = getDate(item.enteredAt);
     if (reportType !== 'all' && reportType !== 'platform') return false;
-    if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
     if (scheduleType === 'weekly') {
       const now = new Date();
       const weekAgo = new Date(now);
       weekAgo.setDate(now.getDate() - 7);
-      if (!isInRange(new Date(item.enteredAt), weekAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+      if (!isInRange(itemDate, weekAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
     }
     if (scheduleType === 'monthly') {
       const now = new Date();
       const monthAgo = new Date(now);
       monthAgo.setMonth(now.getMonth() - 1);
-      if (!isInRange(new Date(item.enteredAt), monthAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+      if (!isInRange(itemDate, monthAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
     }
     if (scheduleType === 'quarterly') {
       const now = new Date();
       const quarterAgo = new Date(now);
       quarterAgo.setMonth(now.getMonth() - 3);
-      if (!isInRange(new Date(item.enteredAt), quarterAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+      if (!isInRange(itemDate, quarterAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
     }
     if (scheduleType === 'custom' && (dateRange.start || dateRange.end)) {
-      if (!isInRange(new Date(item.enteredAt), dateRange.start, dateRange.end)) return false;
+      if (!isInRange(itemDate, dateRange.start, dateRange.end)) return false;
     }
     return true;
   });
   const filteredWebsiteData = websiteData.filter((item) => {
+    const itemDate = getDate(item.enteredAt);
     if (reportType !== 'all' && reportType !== 'website') return false;
-    if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (scheduleType === 'weekly') {
+      const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(now.getDate() - 7);
+      if (!isInRange(itemDate, weekAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'monthly') {
+      const now = new Date();
+      const monthAgo = new Date(now);
+      monthAgo.setMonth(now.getMonth() - 1);
+      if (!isInRange(itemDate, monthAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'quarterly') {
+      const now = new Date();
+      const quarterAgo = new Date(now);
+      quarterAgo.setMonth(now.getMonth() - 3);
+      if (!isInRange(itemDate, quarterAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'custom' && (dateRange.start || dateRange.end)) {
+      if (!isInRange(itemDate, dateRange.start, dateRange.end)) return false;
+    }
     return true;
   });
   const filteredNewsData = newsData.filter((item) => {
+    const itemDate = getDate(item.enteredAt);
     if (reportType !== 'all' && reportType !== 'news') return false;
-    if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (scheduleType === 'weekly') {
+      const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(now.getDate() - 7);
+      if (!isInRange(itemDate, weekAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'monthly') {
+      const now = new Date();
+      const monthAgo = new Date(now);
+      monthAgo.setMonth(now.getMonth() - 1);
+      if (!isInRange(itemDate, monthAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'quarterly') {
+      const now = new Date();
+      const quarterAgo = new Date(now);
+      quarterAgo.setMonth(now.getMonth() - 3);
+      if (!isInRange(itemDate, quarterAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'custom' && (dateRange.start || dateRange.end)) {
+      if (!isInRange(itemDate, dateRange.start, dateRange.end)) return false;
+    }
     return true;
   });
 
@@ -115,7 +167,7 @@ const Reports: React.FC = () => {
     ],
   };
   const pieLabels = [...new Set(filteredPlatformData.map(p => p.platform))];
-  const pieDataArr = pieLabels.map(label => filteredPlatformData.filter(p => p.platform === label).reduce((sum, p) => sum + p.metrics.followers, 0));
+  const pieDataArr = pieLabels.map(label => filteredPlatformData.filter(p => p.platform === label).reduce((sum, p) => sum + (p.metrics?.followers || 0), 0));
   const pieData = {
     labels: pieLabels,
     datasets: [
