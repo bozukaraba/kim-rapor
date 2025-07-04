@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, PlatformData, WebsiteData, NewsData } from '../types';
+import { db } from '../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface AppContextType {
   user: User | null;
@@ -67,6 +69,23 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('newsData', JSON.stringify(newsData));
   }, [newsData]);
+
+  useEffect(() => {
+    const unsubPlatform = onSnapshot(collection(db, 'platformData'), (snapshot) => {
+      setPlatformData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformData[]);
+    });
+    const unsubWebsite = onSnapshot(collection(db, 'websiteData'), (snapshot) => {
+      setWebsiteData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WebsiteData[]);
+    });
+    const unsubNews = onSnapshot(collection(db, 'newsData'), (snapshot) => {
+      setNewsData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsData[]);
+    });
+    return () => {
+      unsubPlatform();
+      unsubWebsite();
+      unsubNews();
+    };
+  }, []);
 
   const addPlatformData = (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
     const newData: PlatformData = {
