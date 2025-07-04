@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Filter, Calendar, TrendingUp, BarChart } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import Chart from './Chart';
 
 const Reports: React.FC = () => {
   const { platformData, websiteData, newsData } = useApp();
@@ -62,6 +63,41 @@ const Reports: React.FC = () => {
     if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
     return true;
   });
+
+  // Grafik verileri (örnek: platform bazlı takipçi sayısı ve dağılımı)
+  const chartLabels = filteredPlatformData.map(p => `${p.platform} ${p.month}`);
+  const chartFollowers = filteredPlatformData.map(p => p.metrics.followers);
+  const chartData = {
+    labels: chartLabels,
+    datasets: [
+      {
+        label: 'Takipçi',
+        data: chartFollowers,
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+      },
+    ],
+  };
+  const pieLabels = [...new Set(filteredPlatformData.map(p => p.platform))];
+  const pieDataArr = pieLabels.map(label => filteredPlatformData.filter(p => p.platform === label).reduce((sum, p) => sum + p.metrics.followers, 0));
+  const pieData = {
+    labels: pieLabels,
+    datasets: [
+      {
+        data: pieDataArr,
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(147, 51, 234, 0.8)',
+          'rgba(16, 185, 129, 0.8)',
+          'rgba(245, 158, 11, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+        ],
+        borderWidth: 0,
+      },
+    ],
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -202,6 +238,17 @@ const Reports: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Takipçi Eğilimi</h3>
+          <Chart data={chartData} type="line" />
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Dağılımı</h3>
+          <Chart data={pieData} type="pie" />
         </div>
       </div>
 
