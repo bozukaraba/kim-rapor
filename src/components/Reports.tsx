@@ -11,6 +11,8 @@ const Reports: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [reportType, setReportType] = useState('all');
+  const [dateRange, setDateRange] = useState<{start: string, end: string}>({start: '', end: ''});
+  const [scheduleType, setScheduleType] = useState('');
 
   const handleExportReport = () => {
     const reportData = {
@@ -50,10 +52,40 @@ const Reports: React.FC = () => {
 
   const summary = generateSummary();
 
+  // Zamanlama filtre fonksiyonu
+  function isInRange(date: Date, start: string, end: string) {
+    if (!start && !end) return true;
+    const d = date.getTime();
+    const s = start ? new Date(start).getTime() : -Infinity;
+    const e = end ? new Date(end).getTime() : Infinity;
+    return d >= s && d <= e;
+  }
+
   // Filtreleme fonksiyonu
   const filteredPlatformData = platformData.filter((item) => {
     if (reportType !== 'all' && reportType !== 'platform') return false;
     if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (scheduleType === 'weekly') {
+      const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(now.getDate() - 7);
+      if (!isInRange(new Date(item.enteredAt), weekAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'monthly') {
+      const now = new Date();
+      const monthAgo = new Date(now);
+      monthAgo.setMonth(now.getMonth() - 1);
+      if (!isInRange(new Date(item.enteredAt), monthAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'quarterly') {
+      const now = new Date();
+      const quarterAgo = new Date(now);
+      quarterAgo.setMonth(now.getMonth() - 3);
+      if (!isInRange(new Date(item.enteredAt), quarterAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'custom' && (dateRange.start || dateRange.end)) {
+      if (!isInRange(new Date(item.enteredAt), dateRange.start, dateRange.end)) return false;
+    }
     return true;
   });
   const filteredWebsiteData = websiteData.filter((item) => {
@@ -236,15 +268,21 @@ const Reports: React.FC = () => {
             <Calendar className="w-5 h-5 text-orange-500" />
           </div>
           <div className="space-y-3">
-            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm" onClick={() => setScheduleType('weekly')}>
               Haftalık Rapor
             </button>
-            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm" onClick={() => setScheduleType('monthly')}>
               Aylık Rapor
             </button>
-            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm" onClick={() => setScheduleType('quarterly')}>
               Üç Aylık Rapor
             </button>
+            <div className="flex items-center space-x-2 mt-2">
+              <input type="date" value={dateRange.start} onChange={e => setDateRange(r => ({...r, start: e.target.value}))} className="border rounded px-2 py-1 text-sm" />
+              <span>-</span>
+              <input type="date" value={dateRange.end} onChange={e => setDateRange(r => ({...r, end: e.target.value}))} className="border rounded px-2 py-1 text-sm" />
+              <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm" onClick={() => setScheduleType('custom')}>Uygula</button>
+            </div>
           </div>
         </div>
       </div>
