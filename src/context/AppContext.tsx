@@ -37,48 +37,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [newsData, setNewsData] = useState<NewsData[]>([]);
   const [currentView, setCurrentView] = useState<'dashboard' | 'entry' | 'reports'>('dashboard');
 
+  // LocalStorage'dan user bilgisini yükle
   useEffect(() => {
-    // Load data from localStorage on mount
     const savedUser = localStorage.getItem('user');
-    const savedPlatformData = localStorage.getItem('platformData');
-    const savedWebsiteData = localStorage.getItem('websiteData');
-    const savedNewsData = localStorage.getItem('newsData');
-
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    if (savedPlatformData) {
-      setPlatformData(JSON.parse(savedPlatformData));
-    }
-    if (savedWebsiteData) {
-      setWebsiteData(JSON.parse(savedWebsiteData));
-    }
-    if (savedNewsData) {
-      setNewsData(JSON.parse(savedNewsData));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error('User parse error:', error);
+        localStorage.removeItem('user');
+      }
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('platformData', JSON.stringify(platformData));
-  }, [platformData]);
-
-  useEffect(() => {
-    localStorage.setItem('websiteData', JSON.stringify(websiteData));
-  }, [websiteData]);
-
-  useEffect(() => {
-    localStorage.setItem('newsData', JSON.stringify(newsData));
-  }, [newsData]);
-
-  useEffect(() => {
     const unsubPlatform = onSnapshot(collection(db, 'platformData'), (snapshot) => {
       setPlatformData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformData[]);
+    }, (error) => {
+      console.error('PlatformData error:', error);
     });
     const unsubWebsite = onSnapshot(collection(db, 'websiteData'), (snapshot) => {
       setWebsiteData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WebsiteData[]);
+    }, (error) => {
+      console.error('WebsiteData error:', error);
     });
     const unsubNews = onSnapshot(collection(db, 'newsData'), (snapshot) => {
       setNewsData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsData[]);
+    }, (error) => {
+      console.error('NewsData error:', error);
     });
     return () => {
       unsubPlatform();
@@ -87,31 +73,46 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     };
   }, []);
 
-  const addPlatformData = (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
-    const newData: PlatformData = {
-      ...data,
-      id: Date.now().toString(),
-      enteredAt: new Date(),
-    };
-    setPlatformData(prev => [...prev, newData]);
+  const addPlatformData = async (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
+    try {
+      const { addDoc, collection } = await import('firebase/firestore');
+      await addDoc(collection(db, 'platformData'), {
+        ...data,
+        enteredAt: new Date(),
+      });
+      console.log('Platform data saved successfully');
+    } catch (error) {
+      console.error('Error saving platform data:', error);
+      throw error;
+    }
   };
 
-  const addWebsiteData = (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => {
-    const newData: WebsiteData = {
-      ...data,
-      id: Date.now().toString(),
-      enteredAt: new Date(),
-    };
-    setWebsiteData(prev => [...prev, newData]);
+  const addWebsiteData = async (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => {
+    try {
+      const { addDoc, collection } = await import('firebase/firestore');
+      await addDoc(collection(db, 'websiteData'), {
+        ...data,
+        enteredAt: new Date(),
+      });
+      console.log('Website data saved successfully');
+    } catch (error) {
+      console.error('Error saving website data:', error);
+      throw error;
+    }
   };
 
-  const addNewsData = (data: Omit<NewsData, 'id' | 'enteredAt'>) => {
-    const newData: NewsData = {
-      ...data,
-      id: Date.now().toString(),
-      enteredAt: new Date(),
-    };
-    setNewsData(prev => [...prev, newData]);
+  const addNewsData = async (data: Omit<NewsData, 'id' | 'enteredAt'>) => {
+    try {
+      const { addDoc, collection } = await import('firebase/firestore');
+      await addDoc(collection(db, 'newsData'), {
+        ...data,
+        enteredAt: new Date(),
+      });
+      console.log('News data saved successfully');
+    } catch (error) {
+      console.error('Error saving news data:', error);
+      throw error;
+    }
   };
 
   const value = {
