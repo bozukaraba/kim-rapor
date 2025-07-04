@@ -46,6 +46,23 @@ const Reports: React.FC = () => {
 
   const summary = generateSummary();
 
+  // Filtreleme fonksiyonu
+  const filteredPlatformData = platformData.filter((item) => {
+    if (reportType !== 'all' && reportType !== 'platform') return false;
+    if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    return true;
+  });
+  const filteredWebsiteData = websiteData.filter((item) => {
+    if (reportType !== 'all' && reportType !== 'website') return false;
+    if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    return true;
+  });
+  const filteredNewsData = newsData.filter((item) => {
+    if (reportType !== 'all' && reportType !== 'news') return false;
+    if (selectedMonth && `${item.year}-${String(new Date(item.enteredAt).getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    return true;
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -154,7 +171,7 @@ const Reports: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Performansı</h3>
           <div className="space-y-4">
-            {platformData.map((platform) => (
+            {filteredPlatformData.map((platform) => (
               <div key={platform.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900">{platform.platform}</p>
@@ -172,7 +189,7 @@ const Reports: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Web Sitesi Analitiği</h3>
           <div className="space-y-4">
-            {websiteData.map((website) => (
+            {filteredWebsiteData.map((website) => (
               <div key={website.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900">Web Sitesi Trafiği</p>
@@ -206,7 +223,7 @@ const Reports: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {platformData.map((platform) => (
+              {filteredPlatformData.map((platform) => (
                 <tr key={platform.id} className="border-b border-gray-100">
                   <td className="py-3 px-4 text-sm text-gray-900">{platform.month} {platform.year}</td>
                   <td className="py-3 px-4 text-sm text-gray-900">{platform.platform}</td>
