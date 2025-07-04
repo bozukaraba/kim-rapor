@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Performance Trends</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Performans Eğilimleri</h3>
             <ArrowUpRight className="w-5 h-5 text-green-500" />
           </div>
           <Chart data={chartData} type="line" />
@@ -102,7 +102,7 @@ const Dashboard: React.FC = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Platform Distribution</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Platform Dağılımı</h3>
             <ArrowUpRight className="w-5 h-5 text-blue-500" />
           </div>
           <Chart data={pieData} type="pie" />
@@ -145,16 +145,16 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Hızlı İşlemler</h3>
           <div className="space-y-2">
             <button className="w-full text-left p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
-              Generate Monthly Report
+              Aylık Rapor Oluştur
             </button>
             <button className="w-full text-left p-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
-              Export Analytics Data
+              Analitik Veriyi Dışa Aktar
             </button>
             <button className="w-full text-left p-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
-              Schedule Report Email
+              Rapor E-postası Zamanla
             </button>
           </div>
         </div>
