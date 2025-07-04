@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Download, Filter, Calendar, TrendingUp, BarChart } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Chart from './Chart';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Reports: React.FC = () => {
   const { platformData, websiteData, newsData } = useApp();
@@ -99,6 +102,49 @@ const Reports: React.FC = () => {
     ],
   };
 
+  // JSON dışa aktarma
+  const handleExportJSON = () => {
+    const data = {
+      platformData: filteredPlatformData,
+      websiteData: filteredWebsiteData,
+      newsData: filteredNewsData,
+      generatedAt: new Date().toISOString(),
+    };
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `rapor_${new Date().toISOString().split('T')[0]}.json`;
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Excel dışa aktarma
+  const handleExportExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(filteredPlatformData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Platform Verileri');
+    XLSX.writeFile(wb, `rapor_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  // PDF dışa aktarma
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Platform Verileri', 14, 16);
+    autoTable(doc, {
+      startY: 22,
+      head: [['Tarih', 'Platform', 'Metrik', 'Değer', 'Ekleyen']],
+      body: filteredPlatformData.map(p => [
+        `${p.month} ${p.year}`,
+        p.platform,
+        'Takipçi',
+        p.metrics.followers,
+        p.enteredBy
+      ]),
+    });
+    doc.save(`rapor_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -170,15 +216,15 @@ const Reports: React.FC = () => {
           </div>
           <div className="space-y-3">
             <button
-              onClick={handleExportReport}
+              onClick={handleExportJSON}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
               JSON Aktar
             </button>
-            <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">
+            <button onClick={handleExportPDF} className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm">
               PDF Aktar
             </button>
-            <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors text-sm">
+            <button onClick={handleExportExcel} className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors text-sm">
               Excel Aktar
             </button>
           </div>
