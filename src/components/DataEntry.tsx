@@ -185,8 +185,8 @@ const DataEntry: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Entry</h1>
-        <p className="text-gray-600">Enter monthly statistics for reporting and analysis</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Veri Girişi</h1>
+        <p className="text-gray-600">Aylık istatistikleri raporlama ve analiz için giriniz</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -200,7 +200,7 @@ const DataEntry: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              Social Media Platforms
+              Sosyal Medya Platformları
             </button>
             <button
               onClick={() => setActiveTab('website')}
@@ -210,7 +210,7 @@ const DataEntry: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              Website Analytics
+              Web Sitesi Analitiği
             </button>
             <button
               onClick={() => setActiveTab('news')}
@@ -220,7 +220,7 @@ const DataEntry: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              News Coverage
+              Haber Kapsamı
             </button>
           </nav>
         </div>
@@ -239,7 +239,7 @@ const DataEntry: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
-                    <option value="">Select platform</option>
+                    <option value="">Platform Seçiniz</option>
                     <option value="Facebook">Facebook</option>
                     <option value="Instagram">Instagram</option>
                     <option value="LinkedIn">LinkedIn</option>
@@ -251,7 +251,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Month
+                    Ay
                   </label>
                   <input
                     type="month"
@@ -266,7 +266,7 @@ const DataEntry: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Followers
+                    Takipçi
                   </label>
                   <input
                     type="number"
@@ -279,7 +279,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Engagement
+                    Etkileşim
                   </label>
                   <input
                     type="number"
@@ -292,7 +292,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Reach
+                    Erişim
                   </label>
                   <input
                     type="number"
@@ -305,7 +305,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Impressions
+                    Gösterim
                   </label>
                   <input
                     type="number"
@@ -318,7 +318,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Clicks
+                    Tıklama
                   </label>
                   <input
                     type="number"
@@ -331,7 +331,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Conversions
+                    Dönüşüm
                   </label>
                   <input
                     type="number"
@@ -349,7 +349,7 @@ const DataEntry: React.FC = () => {
                   className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Platform Data</span>
+                  <span>Platform Verisini Kaydet</span>
                 </button>
               </div>
             </form>
@@ -360,7 +360,7 @@ const DataEntry: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Month
+                    Ay
                   </label>
                   <input
                     type="month"
@@ -370,12 +370,10 @@ const DataEntry: React.FC = () => {
                     required
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Visitors
+                    Ziyaretçi
                   </label>
                   <input
                     type="number"
@@ -388,7 +386,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Page Views
+                    Sayfa Görüntüleme
                   </label>
                   <input
                     type="number"
@@ -401,7 +399,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bounce Rate (%)
+                    Hemen Çıkma Oranı (%)
                   </label>
                   <input
                     type="number"
@@ -415,7 +413,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Avg Session Duration (minutes)
+                    Ortalama Oturum Süresi (dakika)
                   </label>
                   <input
                     type="number"
@@ -429,7 +427,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Conversions
+                    Dönüşüm
                   </label>
                   <input
                     type="number"
@@ -444,7 +442,7 @@ const DataEntry: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    Top Pages
+                    En Popüler Sayfalar
                   </label>
                   <button
                     type="button"
@@ -452,7 +450,7 @@ const DataEntry: React.FC = () => {
                     className="flex items-center space-x-1 text-blue-600 hover:text-blue-700"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add Page</span>
+                    <span>Sayfa Ekle</span>
                   </button>
                 </div>
                 {websiteForm.topPages.map((page, index) => (
@@ -466,7 +464,7 @@ const DataEntry: React.FC = () => {
                         setWebsiteForm({...websiteForm, topPages: newPages});
                       }}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Page URL or title"
+                      placeholder="Sayfa URL'si veya başlığı"
                     />
                     {websiteForm.topPages.length > 1 && (
                       <button
@@ -487,7 +485,7 @@ const DataEntry: React.FC = () => {
                   className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Website Data</span>
+                  <span>Web Sitesi Verisini Kaydet</span>
                 </button>
               </div>
             </form>
@@ -498,7 +496,7 @@ const DataEntry: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Month
+                    Ay
                   </label>
                   <input
                     type="month"
@@ -511,7 +509,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sentiment
+                    Duygu Durumu
                   </label>
                   <select
                     value={newsForm.sentiment}
@@ -519,9 +517,9 @@ const DataEntry: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
-                    <option value="positive">Positive</option>
-                    <option value="neutral">Neutral</option>
-                    <option value="negative">Negative</option>
+                    <option value="positive">Olumlu</option>
+                    <option value="neutral">Nötr</option>
+                    <option value="negative">Olumsuz</option>
                   </select>
                 </div>
               </div>
@@ -529,7 +527,7 @@ const DataEntry: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mentions
+                    Haber Bahsi
                   </label>
                   <input
                     type="number"
@@ -542,7 +540,7 @@ const DataEntry: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Reach
+                    Erişim
                   </label>
                   <input
                     type="number"
@@ -557,7 +555,7 @@ const DataEntry: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    Top Sources
+                    En Popüler Kaynaklar
                   </label>
                   <button
                     type="button"
@@ -565,7 +563,7 @@ const DataEntry: React.FC = () => {
                     className="flex items-center space-x-1 text-blue-600 hover:text-blue-700"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add Source</span>
+                    <span>Kaynak Ekle</span>
                   </button>
                 </div>
                 {newsForm.topSources.map((source, index) => (
@@ -579,7 +577,7 @@ const DataEntry: React.FC = () => {
                         setNewsForm({...newsForm, topSources: newSources});
                       }}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="News source name"
+                      placeholder="Haber kaynağı adı"
                     />
                     {newsForm.topSources.length > 1 && (
                       <button
@@ -600,7 +598,7 @@ const DataEntry: React.FC = () => {
                   className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save News Data</span>
+                  <span>Haber Verisini Kaydet</span>
                 </button>
               </div>
             </form>

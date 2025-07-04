@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel Genel Bakış</h1>
         <div className="flex items-center space-x-2 text-gray-600">
           <Calendar className="w-5 h-5" />
           <span>{currentMonth}</span>
@@ -62,28 +62,28 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
-          title="Total Followers"
+          title="Toplam Takipçi"
           value={totalFollowers.toLocaleString()}
           change="+12.5%"
           icon={Users}
           color="blue"
         />
         <MetricCard
-          title="Engagement Rate"
+          title="Etkileşim Oranı"
           value={`${((totalEngagement / totalFollowers) * 100).toFixed(1)}%`}
           change="+8.2%"
           icon={TrendingUp}
           color="purple"
         />
         <MetricCard
-          title="Website Visitors"
+          title="Web Sitesi Ziyaretçileri"
           value={totalVisitors.toLocaleString()}
           change="+15.3%"
           icon={Globe}
           color="green"
         />
         <MetricCard
-          title="Media Mentions"
+          title="Medya Bahsi"
           value={totalMentions.toLocaleString()}
           change="+22.1%"
           icon={MessageSquare}
