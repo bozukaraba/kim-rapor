@@ -15,6 +15,41 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Geçici çözüm - Firebase Auth olmadan test
+      const user = {
+        id: 'demo-user-id',
+        name: 'Demo Kullanıcı',
+        email: 'demo@kimrapor.com',
+        role: 'analyst' as const,
+        department: 'Demo Departman'
+      };
+      setUser(user);
+      
+      // Firebase Authentication aktif olduğunda bu kısım kullanılacak:
+      // const demoEmail = 'demo@kimrapor.com';
+      // const demoPassword = 'demo123';
+      // const userCredential = await signInWithEmailAndPassword(auth, demoEmail, demoPassword);
+      // const user = {
+      //   id: userCredential.user.uid,
+      //   name: 'Demo Kullanıcı',
+      //   email: demoEmail,
+      //   role: 'analyst' as const,
+      //   department: 'Demo Departman'
+      // };
+      // setUser(user);
+    } catch (err) {
+      console.error('Demo login error:', err);
+      setError('Demo girişi başarısız.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -42,11 +77,24 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
         <h2 className="text-2xl font-bold text-center mb-6">Giriş Yap</h2>
+        
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
             {error}
           </div>
         )}
+
+        <div className="mb-4">
+          <button
+            onClick={handleDemoLogin}
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 mb-4"
+          >
+            {loading ? 'Giriş yapılıyor...' : 'Demo ile Giriş Yap'}
+          </button>
+          <div className="text-center text-sm text-gray-500 mb-4">veya</div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

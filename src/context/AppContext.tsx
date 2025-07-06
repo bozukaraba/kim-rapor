@@ -63,8 +63,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Initial data load
   useEffect(() => {
-    if (!firebaseUser) return;
-
+    // Geçici: Auth kontrolü olmadan veri yükle
     const loadInitialData = async () => {
       try {
         const platformSnapshot = await getDocs(collection(db, 'platformData'));
@@ -87,10 +86,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     };
 
     loadInitialData();
-  }, [firebaseUser]);
+  }, []);
 
   // Real-time updates
   useEffect(() => {
+    // Geçici: Auth kontrolü olmadan real-time updates
     const unsubPlatform = onSnapshot(
       collection(db, 'platformData'),
       (snapshot) => {
@@ -144,7 +144,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   const addPlatformData = async (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
-    await import('firebase/firestore').then(async ({ addDoc, collection, serverTimestamp }) => {
+    // Geçici: Auth kontrolü kaldırıldı
+    // if (!firebaseUser) throw new Error('Kullanıcı girişi gerekli');
+    
+    await import('firebase/firestore').then(async ({ addDoc, collection }) => {
       await addDoc(collection(db, 'platformData'), {
         ...data,
         enteredAt: new Date(),
@@ -153,7 +156,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const addWebsiteData = async (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => {
-    await import('firebase/firestore').then(async ({ addDoc, collection, serverTimestamp }) => {
+    // Geçici: Auth kontrolü kaldırıldı
+    // if (!firebaseUser) throw new Error('Kullanıcı girişi gerekli');
+    
+    await import('firebase/firestore').then(async ({ addDoc, collection }) => {
       await addDoc(collection(db, 'websiteData'), {
         ...data,
         enteredAt: new Date(),
@@ -162,7 +168,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const addNewsData = async (data: Omit<NewsData, 'id' | 'enteredAt'>) => {
-    await import('firebase/firestore').then(async ({ addDoc, collection, serverTimestamp }) => {
+    // Geçici: Auth kontrolü kaldırıldı
+    // if (!firebaseUser) throw new Error('Kullanıcı girişi gerekli');
+    
+    await import('firebase/firestore').then(async ({ addDoc, collection }) => {
       await addDoc(collection(db, 'newsData'), {
         ...data,
         enteredAt: new Date(),
