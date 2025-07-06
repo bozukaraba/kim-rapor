@@ -63,7 +63,8 @@ export const addPlatformData = async (platformData: any) => {
       month: platformData.month,
       year: platformData.year,
       entered_by: platformData.enteredBy,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      // Geçici: Demo modu için user_id null olabilir
+      user_id: null // (await supabase.auth.getUser()).data.user?.id
     }])
   return { data, error }
 }
@@ -89,7 +90,8 @@ export const addWebsiteData = async (websiteData: any) => {
       month: websiteData.month,
       year: websiteData.year,
       entered_by: websiteData.enteredBy,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      // Geçici: Demo modu için user_id null olabilir
+      user_id: null // (await supabase.auth.getUser()).data.user?.id
     }])
   return { data, error }
 }
@@ -113,7 +115,8 @@ export const addNewsData = async (newsData: any) => {
       month: newsData.month,
       year: newsData.year,
       entered_by: newsData.enteredBy,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      // Geçici: Demo modu için user_id null olabilir
+      user_id: null // (await supabase.auth.getUser()).data.user?.id
     }])
   return { data, error }
 }

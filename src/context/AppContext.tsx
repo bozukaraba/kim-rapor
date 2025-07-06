@@ -108,6 +108,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Supabase Auth state listener
   useEffect(() => {
+    // Geçici: Demo modu için auth kontrolü devre dışı
+    /*
     const { data: { subscription } } = onAuthStateChange((event, session) => {
       setSupabaseUser(session?.user || null);
       if (!session?.user) {
@@ -119,6 +121,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
 
     return () => subscription.unsubscribe();
+    */
   }, []);
 
   // Initial data load

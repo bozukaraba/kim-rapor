@@ -180,7 +180,7 @@ const DataEntry: React.FC = () => {
         .insert([{
           platform,
           value: Number(value),
-          user_id: (await supabase.auth.getUser()).data.user?.id
+          user_id: null
         }]);
       
       if (error) throw error;

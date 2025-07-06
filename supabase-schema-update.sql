@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.platform_data (
   year INTEGER NOT NULL,
   entered_by TEXT NOT NULL,
   entered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
 );
 
 -- Website verileri tablosu (eğer yoksa oluştur)
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.website_data (
   year INTEGER NOT NULL,
   entered_by TEXT NOT NULL,
   entered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
 );
 
 -- Haber verileri tablosu (eğer yoksa oluştur)
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS public.news_data (
   year INTEGER NOT NULL,
   entered_by TEXT NOT NULL,
   entered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
 );
 
 -- Eski istatistikler tablosu (eğer yoksa oluştur)
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS public.statistics (
   platform TEXT NOT NULL,
   value INTEGER NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
 );
 
 -- Raporlar tablosu (eğer yoksa oluştur)
@@ -75,10 +75,12 @@ CREATE TABLE IF NOT EXISTS public.reports (
   data JSONB NOT NULL,
   generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   generated_by TEXT NOT NULL,
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
 );
 
--- RLS (Row Level Security) politikaları
+-- RLS (Row Level Security) politikaları - Demo modu için geçici olarak devre dışı
+-- Gerçek production'da bu politikaları aktif edin
+
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Users can read their own data') THEN
     ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;

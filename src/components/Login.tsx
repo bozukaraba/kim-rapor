@@ -21,14 +21,26 @@ const Login: React.FC = () => {
     setError(null);
     
     try {
-      // Demo kullanıcı bilgileri
-      const demoEmail = 'demo@kimrapor.com';
+      // Basit demo modu - authentication bypass
+      const user = {
+        id: 'demo-user-' + Date.now(),
+        name: 'Demo Kullanıcı',
+        email: 'demo@example.com',
+        role: 'analyst' as const,
+        department: 'Demo Departman'
+      };
+      setUser(user);
+      console.log('Demo modu aktif - authentication bypass');
+      
+      // Eğer gerçek Supabase auth istiyorsanız, aşağıdaki kodu uncomment edin:
+      /*
+      const demoEmail = 'demo@example.com';
       const demoPassword = 'demo123456';
       
       const { data, error } = await signInWithEmail(demoEmail, demoPassword);
       
       if (error) {
-        // Demo kullanıcı yoksa oluştur
+        console.log('Demo kullanıcı bulunamadı, oluşturuluyor...');
         const { data: signUpData, error: signUpError } = await signUpWithEmail(
           demoEmail, 
           demoPassword, 
@@ -39,7 +51,10 @@ const Login: React.FC = () => {
           }
         );
         
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          console.error('Demo kullanıcı oluşturma hatası:', signUpError);
+          throw new Error(`Demo hesabı oluşturulamadı: ${signUpError.message}`);
+        }
         
         if (signUpData.user) {
           const user = {
@@ -50,6 +65,7 @@ const Login: React.FC = () => {
             department: 'Demo Departman'
           };
           setUser(user);
+          console.log('Demo kullanıcı başarıyla oluşturuldu ve giriş yapıldı');
         }
       } else if (data.user) {
         const user = {
@@ -60,10 +76,12 @@ const Login: React.FC = () => {
           department: 'Demo Departman'
         };
         setUser(user);
+        console.log('Demo kullanıcı ile başarıyla giriş yapıldı');
       }
+      */
     } catch (err: any) {
       console.error('Demo login error:', err);
-      setError('Demo girişi başarısız: ' + err.message);
+      setError(`Demo girişi başarısız: ${err.message}`);
     } finally {
       setLoading(false);
     }
