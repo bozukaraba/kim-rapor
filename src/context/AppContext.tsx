@@ -111,7 +111,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Mevcut session'ı kontrol et
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session); // Debug için
       if (session?.user) {
+        console.log('User found:', session.user); // Debug için
         setSupabaseUser(session.user);
         setUser({
           id: session.user.id,
@@ -120,6 +122,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           role: 'analyst',
           department: 'Digital Marketing'
         });
+      } else {
+        console.log('No session found'); // Debug için
       }
     };
 

@@ -52,6 +52,11 @@ export const getPlatformData = async () => {
 export const addPlatformData = async (platformData: any) => {
   // Mevcut kullanıcıyı al
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('Current user:', user); // Debug için
+  
+  // Session kontrolü
+  const { data: { session } } = await supabase.auth.getSession();
+  console.log('Current session:', session); // Debug için
   
   const { data, error } = await supabase
     .from('platform_data')
