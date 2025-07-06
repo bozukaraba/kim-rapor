@@ -42,7 +42,8 @@ const DataEntry: React.FC = () => {
 
   const handlePlatformSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    // Demo modu için user kontrolü kaldırıldı
+    // if (!user) return;
     setLoading(true);
     setSuccess(false);
     const [year, month] = platformForm.month.split('-');
@@ -59,7 +60,7 @@ const DataEntry: React.FC = () => {
         },
         month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
         year: parseInt(year),
-        enteredBy: user.name,
+        enteredBy: user?.name || 'Demo User',
       });
       setPlatformForm({
         platform: '',
@@ -80,7 +81,8 @@ const DataEntry: React.FC = () => {
 
   const handleWebsiteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    // Demo modu için user kontrolü kaldırıldı
+    // if (!user) return;
     setLoading(true);
     setSuccess(false);
     const [year, month] = websiteForm.month.split('-');
@@ -94,7 +96,7 @@ const DataEntry: React.FC = () => {
         topPages: websiteForm.topPages.filter(page => page.trim() !== ''),
         month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
         year: parseInt(year),
-        enteredBy: user.name,
+        enteredBy: user?.name || 'Demo User',
       });
       setWebsiteForm({
         visitors: '',
@@ -114,7 +116,8 @@ const DataEntry: React.FC = () => {
 
   const handleNewsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    // Demo modu için user kontrolü kaldırıldı
+    // if (!user) return;
     setLoading(true);
     setSuccess(false);
     const [year, month] = newsForm.month.split('-');
@@ -126,7 +129,7 @@ const DataEntry: React.FC = () => {
         topSources: newsForm.topSources.filter(source => source.trim() !== ''),
         month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
         year: parseInt(year),
-        enteredBy: user.name,
+        enteredBy: user?.name || 'Demo User',
       });
       setNewsForm({
         mentions: '',
