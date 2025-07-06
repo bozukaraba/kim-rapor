@@ -50,6 +50,9 @@ export const getPlatformData = async () => {
 }
 
 export const addPlatformData = async (platformData: any) => {
+  // Mevcut kullanıcıyı al
+  const { data: { user } } = await supabase.auth.getUser()
+  
   const { data, error } = await supabase
     .from('platform_data')
     .insert([{
@@ -63,8 +66,7 @@ export const addPlatformData = async (platformData: any) => {
       month: platformData.month,
       year: platformData.year,
       entered_by: platformData.enteredBy,
-      // Geçici: Demo modu için user_id null olabilir
-      user_id: null // (await supabase.auth.getUser()).data.user?.id
+      user_id: user?.id || null
     }])
   return { data, error }
 }
@@ -78,6 +80,9 @@ export const getWebsiteData = async () => {
 }
 
 export const addWebsiteData = async (websiteData: any) => {
+  // Mevcut kullanıcıyı al
+  const { data: { user } } = await supabase.auth.getUser()
+  
   const { data, error } = await supabase
     .from('website_data')
     .insert([{
@@ -90,8 +95,7 @@ export const addWebsiteData = async (websiteData: any) => {
       month: websiteData.month,
       year: websiteData.year,
       entered_by: websiteData.enteredBy,
-      // Geçici: Demo modu için user_id null olabilir
-      user_id: null // (await supabase.auth.getUser()).data.user?.id
+      user_id: user?.id || null
     }])
   return { data, error }
 }
@@ -105,6 +109,9 @@ export const getNewsData = async () => {
 }
 
 export const addNewsData = async (newsData: any) => {
+  // Mevcut kullanıcıyı al
+  const { data: { user } } = await supabase.auth.getUser()
+  
   const { data, error } = await supabase
     .from('news_data')
     .insert([{
@@ -115,8 +122,7 @@ export const addNewsData = async (newsData: any) => {
       month: newsData.month,
       year: newsData.year,
       entered_by: newsData.enteredBy,
-      // Geçici: Demo modu için user_id null olabilir
-      user_id: null // (await supabase.auth.getUser()).data.user?.id
+      user_id: user?.id || null
     }])
   return { data, error }
 }
