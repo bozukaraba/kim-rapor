@@ -1,11 +1,9 @@
 // Supabase yapılandırma dosyası
 import { createClient } from '@supabase/supabase-js'
 
-// TODO: Supabase Dashboard'dan alın:
-// 1. Project Settings → API → Project URL
-// 2. Project Settings → API → Project API keys → anon public
-const supabaseUrl = 'YOUR_SUPABASE_URL' // örn: https://abcdefgh.supabase.co
-const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY' // anon public key
+// Supabase config bilgileri
+const supabaseUrl = 'https://nrgvbfgiaksyagaznyhx.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yZ3ZiZmdpYWtzeWFnYXpueWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjQ4ODUsImV4cCI6MjA2NzQwMDg4NX0.eJBJ85fkxiIWSOyOU8GwF6UTgukor9K2zBsXLCLm5PU'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
