@@ -5,9 +5,12 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import DataEntry from './components/DataEntry';
 import Reports from './components/Reports';
+import NotificationToast from './components/NotificationToast';
+import { useRealTimeNotifications } from './hooks/useRealTimeNotifications';
 
 const AppContent: React.FC = () => {
   const { user, currentView } = useApp();
+  const { notifications, removeNotification } = useRealTimeNotifications();
 
   if (!user) {
     return <Login />;
@@ -21,6 +24,10 @@ const AppContent: React.FC = () => {
         {currentView === 'entry' && <DataEntry />}
         {currentView === 'reports' && <Reports />}
       </main>
+      <NotificationToast 
+        notifications={notifications} 
+        onRemove={removeNotification} 
+      />
     </div>
   );
 };

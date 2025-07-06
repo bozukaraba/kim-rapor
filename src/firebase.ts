@@ -1,6 +1,7 @@
 // Firebase yapılandırma dosyası
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // TODO: Buraya kendi Firebase config bilgilerinizi ekleyin
 const firebaseConfig = {
@@ -14,5 +15,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-export { db }; 
+export { db, auth, signInWithEmailAndPassword, signOut, onAuthStateChanged }; 

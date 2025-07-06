@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, PlatformData, WebsiteData, NewsData } from '../types';
-import { db } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { db, auth, onAuthStateChanged } from '../firebase';
+import { collection, onSnapshot, getDocs } from 'firebase/firestore';
+import { User as FirebaseUser } from 'firebase/auth';
 
 interface AppContextType {
   user: User | null;
@@ -14,6 +15,10 @@ interface AppContextType {
   addNewsData: (data: Omit<NewsData, 'id' | 'enteredAt'>) => Promise<void>;
   currentView: 'dashboard' | 'entry' | 'reports';
   setCurrentView: (view: 'dashboard' | 'entry' | 'reports') => void;
+  isConnected: boolean;
+  lastUpdate: Date;
+  error: string | null;
+  firebaseUser: FirebaseUser | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -32,21 +37,105 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [websiteData, setWebsiteData] = useState<WebsiteData[]>([]);
   const [newsData, setNewsData] = useState<NewsData[]>([]);
   const [currentView, setCurrentView] = useState<'dashboard' | 'entry' | 'reports'>('dashboard');
+  const [isConnected, setIsConnected] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [error, setError] = useState<string | null>(null);
 
+  // Firebase Auth state listener
   useEffect(() => {
-    const unsubPlatform = onSnapshot(collection(db, 'platformData'), (snapshot) => {
-      setPlatformData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformData[]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      if (!user) {
+        setUser(null);
+        setPlatformData([]);
+        setWebsiteData([]);
+        setNewsData([]);
+      }
     });
-    const unsubWebsite = onSnapshot(collection(db, 'websiteData'), (snapshot) => {
-      setWebsiteData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WebsiteData[]);
-    });
-    const unsubNews = onSnapshot(collection(db, 'newsData'), (snapshot) => {
-      setNewsData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsData[]);
-    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Initial data load
+  useEffect(() => {
+    if (!firebaseUser) return;
+
+    const loadInitialData = async () => {
+      try {
+        const platformSnapshot = await getDocs(collection(db, 'platformData'));
+        setPlatformData(platformSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformData[]);
+        
+        const websiteSnapshot = await getDocs(collection(db, 'websiteData'));
+        setWebsiteData(websiteSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WebsiteData[]);
+        
+        const newsSnapshot = await getDocs(collection(db, 'newsData'));
+        setNewsData(newsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsData[]);
+        
+        setLastUpdate(new Date());
+        setIsConnected(true);
+        setError(null);
+      } catch (error) {
+        console.error('Initial data load error:', error);
+        setIsConnected(false);
+        setError('Veri yüklenirken hata oluştu');
+      }
+    };
+
+    loadInitialData();
+  }, [firebaseUser]);
+
+  // Real-time updates
+  useEffect(() => {
+    const unsubPlatform = onSnapshot(
+      collection(db, 'platformData'),
+      (snapshot) => {
+        setPlatformData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformData[]);
+        setLastUpdate(new Date());
+        setIsConnected(true);
+        setError(null);
+      },
+      (error) => {
+        console.error('Platform data error:', error);
+        setIsConnected(false);
+        setError('Platform verilerinde bağlantı hatası');
+      }
+    );
+    
+    const unsubWebsite = onSnapshot(
+      collection(db, 'websiteData'),
+      (snapshot) => {
+        setWebsiteData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WebsiteData[]);
+        setLastUpdate(new Date());
+        setIsConnected(true);
+        setError(null);
+      },
+      (error) => {
+        console.error('Website data error:', error);
+        setIsConnected(false);
+        setError('Website verilerinde bağlantı hatası');
+      }
+    );
+    
+    const unsubNews = onSnapshot(
+      collection(db, 'newsData'),
+      (snapshot) => {
+        setNewsData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsData[]);
+        setLastUpdate(new Date());
+        setIsConnected(true);
+        setError(null);
+      },
+      (error) => {
+        console.error('News data error:', error);
+        setIsConnected(false);
+        setError('Haber verilerinde bağlantı hatası');
+      }
+    );
+    
     return () => {
       unsubPlatform();
       unsubWebsite();
@@ -92,6 +181,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     addNewsData,
     currentView,
     setCurrentView,
+    isConnected,
+    lastUpdate,
+    error,
+    firebaseUser
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
