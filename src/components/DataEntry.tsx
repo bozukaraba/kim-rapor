@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Save, Plus, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 const DataEntry: React.FC = () => {
   const { user, addPlatformData, addWebsiteData, addNewsData } = useApp();
@@ -176,15 +175,21 @@ const DataEntry: React.FC = () => {
     setLoading(true);
     setSuccess(false);
     try {
-      await addDoc(collection(db, 'istatistikler'), {
-        platform,
-        value: Number(value),
-        createdAt: new Date(),
-      });
+      const { error } = await supabase
+        .from('statistics')
+        .insert([{
+          platform,
+          value: Number(value),
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }]);
+      
+      if (error) throw error;
+      
       setSuccess(true);
       setPlatform('');
       setValue('');
     } catch (err) {
+      console.error('Save error:', err);
       alert('Kayıt başarısız!');
     }
     setLoading(false);
