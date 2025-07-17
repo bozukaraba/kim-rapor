@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const Reports: React.FC = () => {
-  const { user, platformData, websiteData, newsData } = useApp();
+  const { user, platformData, websiteData, newsData, rpaData } = useApp();
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [reportType, setReportType] = useState('all');
@@ -19,6 +19,7 @@ const Reports: React.FC = () => {
       platformData,
       websiteData,
       newsData,
+      rpaData,
       generatedAt: new Date().toISOString(),
     };
     
@@ -39,6 +40,9 @@ const Reports: React.FC = () => {
     const totalEngagement = platformData.reduce((sum, data) => sum + data.metrics.engagement, 0);
     const totalWebsiteVisitors = websiteData.reduce((sum, data) => sum + data.visitors, 0);
     const totalMentions = newsData.reduce((sum, data) => sum + data.mentions, 0);
+    const totalRPAReports = rpaData.length;
+    const totalIncomingMails = rpaData.reduce((sum, data) => sum + data.totalIncomingMails, 0);
+    const totalDistributedMails = rpaData.reduce((sum, data) => sum + data.totalDistributed, 0);
     
     return {
       totalPlatforms,
@@ -46,7 +50,11 @@ const Reports: React.FC = () => {
       totalEngagement,
       totalWebsiteVisitors,
       totalMentions,
+      totalRPAReports,
+      totalIncomingMails,
+      totalDistributedMails,
       avgEngagementRate: totalFollowers > 0 ? (totalEngagement / totalFollowers * 100).toFixed(2) : 0,
+      rpaEfficiencyRate: totalIncomingMails > 0 ? ((totalDistributedMails / totalIncomingMails) * 100).toFixed(1) : '0',
     };
   };
 
@@ -56,18 +64,19 @@ const Reports: React.FC = () => {
   const getFilteredDataByRole = () => {
     if (user?.role === 'admin') {
       // Admin tüm verileri görebilir
-      return { platformData, websiteData, newsData };
+      return { platformData, websiteData, newsData, rpaData };
     } else {
       // Staff sadece kendi verilerini görebilir
       return {
         platformData: platformData.filter(d => d.enteredBy === user?.name),
         websiteData: websiteData.filter(d => d.enteredBy === user?.name),
-        newsData: newsData.filter(d => d.enteredBy === user?.name)
+        newsData: newsData.filter(d => d.enteredBy === user?.name),
+        rpaData: rpaData.filter(d => d.enteredBy === user?.name)
       };
     }
   };
 
-  const { platformData: roleFilteredPlatform, websiteData: roleFilteredWebsite, newsData: roleFilteredNews } = getFilteredDataByRole();
+  const { platformData: roleFilteredPlatform, websiteData: roleFilteredWebsite, newsData: roleFilteredNews, rpaData: roleFilteredRPA } = getFilteredDataByRole();
 
   // Zamanlama filtre fonksiyonu
   function isInRange(date: Date, start: string, end: string) {
@@ -167,6 +176,33 @@ const Reports: React.FC = () => {
     }
     return true;
   });
+  const filteredRPAData = roleFilteredRPA.filter((item) => {
+    const itemDate = getDate(item.enteredAt);
+    if (reportType !== 'all' && reportType !== 'rpa') return false;
+    if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
+    if (scheduleType === 'weekly') {
+      const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(now.getDate() - 7);
+      if (!isInRange(itemDate, weekAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'monthly') {
+      const now = new Date();
+      const monthAgo = new Date(now);
+      monthAgo.setMonth(now.getMonth() - 1);
+      if (!isInRange(itemDate, monthAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'quarterly') {
+      const now = new Date();
+      const quarterAgo = new Date(now);
+      quarterAgo.setMonth(now.getMonth() - 3);
+      if (!isInRange(itemDate, quarterAgo.toISOString().slice(0,10), now.toISOString().slice(0,10))) return false;
+    }
+    if (scheduleType === 'custom' && (dateRange.start || dateRange.end)) {
+      if (!isInRange(itemDate, dateRange.start, dateRange.end)) return false;
+    }
+    return true;
+  });
 
   // Grafik verileri (örnek: platform bazlı takipçi sayısı ve dağılımı)
   const chartLabels = filteredPlatformData.map(p => `${p.platform} ${p.month}`);
@@ -209,6 +245,7 @@ const Reports: React.FC = () => {
       platformData: filteredPlatformData,
       websiteData: filteredWebsiteData,
       newsData: filteredNewsData,
+      rpaData: filteredRPAData,
       generatedAt: new Date().toISOString(),
     };
     const dataStr = JSON.stringify(data, null, 2);
@@ -279,6 +316,14 @@ const Reports: React.FC = () => {
               <span className="text-sm text-gray-600">Ortalama Etkileşim</span>
               <span className="font-semibold">{summary.avgEngagementRate}%</span>
             </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-gray-600">RPA Rapor Sayısı</span>
+              <span className="font-semibold">{summary.totalRPAReports}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-gray-600">RPA Verimlilik</span>
+              <span className="font-semibold">{summary.rpaEfficiencyRate}%</span>
+            </div>
           </div>
         </div>
 
@@ -301,6 +346,7 @@ const Reports: React.FC = () => {
                 <option value="platform">Sosyal Medya</option>
                 <option value="website">Web Sitesi</option>
                 <option value="news">Haber Kapsamı</option>
+                <option value="rpa">RPA Rapor</option>
               </select>
             </div>
             <div>
@@ -443,6 +489,45 @@ const Reports: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* RPA Detaylı Rapor */}
+      {(reportType === 'all' || reportType === 'rpa') && filteredRPAData.length > 0 && (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mt-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">RPA Detaylı Rapor</h3>
+            <BarChart className="w-5 h-5 text-orange-500" />
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Tarih</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Gelen Mail</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Dağıtılan Mail</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">1. Birim</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">2. Birim</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">3. Birim</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Ekleyen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRPAData.map((rpa) => (
+                  <tr key={rpa.id} className="border-b border-gray-100">
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.month} {rpa.year}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.totalIncomingMails.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.totalDistributed.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.topRedirectedUnits.unit1}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.topRedirectedUnits.unit2}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.topRedirectedUnits.unit3}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{rpa.enteredBy}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

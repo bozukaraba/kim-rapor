@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Users, Globe, MessageSquare, Calendar, ArrowUpRight, Wifi, WifiOff } from 'lucide-react';
+import { TrendingUp, Users, Globe, MessageSquare, Calendar, ArrowUpRight, Wifi, WifiOff, BarChart } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import MetricCard from './MetricCard';
 import Chart from './Chart';
 
 const Dashboard: React.FC = () => {
-  const { platformData, websiteData, newsData, isConnected, lastUpdate, error } = useApp();
+  const { platformData, websiteData, newsData, rpaData, isConnected, lastUpdate, error } = useApp();
   const [loading, setLoading] = useState(false);
 
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -13,7 +13,7 @@ const Dashboard: React.FC = () => {
   // Veri değişikliklerinde loading state'ini güncelle
   useEffect(() => {
     setLoading(false);
-  }, [platformData, websiteData, newsData]);
+  }, [platformData, websiteData, newsData, rpaData]);
 
   // Periyodik loading animasyonu (sadece görsel feedback)
   useEffect(() => {
@@ -31,6 +31,11 @@ const Dashboard: React.FC = () => {
   const totalEngagement = platformData.reduce((sum, data) => sum + data.metrics.engagement, 0);
   const totalVisitors = websiteData.reduce((sum, data) => sum + data.visitors, 0);
   const totalMentions = newsData.reduce((sum, data) => sum + data.mentions, 0);
+  
+  // RPA metrikleri
+  const totalIncomingMails = rpaData.reduce((sum, data) => sum + data.totalIncomingMails, 0);
+  const totalDistributedMails = rpaData.reduce((sum, data) => sum + data.totalDistributed, 0);
+  const rpaEfficiencyRate = totalIncomingMails > 0 ? ((totalDistributedMails / totalIncomingMails) * 100).toFixed(1) : '0';
 
   const chartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -140,6 +145,34 @@ const Dashboard: React.FC = () => {
           icon={MessageSquare}
           color="orange"
         />
+      </div>
+
+      {/* RPA Rapor Metrikleri */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">RPA Rapor Metrikleri</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MetricCard
+            title="Toplam Gelen Mail"
+            value={totalIncomingMails.toLocaleString()}
+            change="+5.2%"
+            icon={TrendingUp}
+            color="orange"
+          />
+          <MetricCard
+            title="Dağıtılan Mail"
+            value={totalDistributedMails.toLocaleString()}
+            change="+4.8%"
+            icon={ArrowUpRight}
+            color="blue"
+          />
+          <MetricCard
+            title="Dağıtım Oranı"
+            value={`${rpaEfficiencyRate}%`}
+            change="+1.2%"
+            icon={BarChart}
+            color="green"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
