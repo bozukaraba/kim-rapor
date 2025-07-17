@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const Reports: React.FC = () => {
-  const { platformData, websiteData, newsData } = useApp();
+  const { user, platformData, websiteData, newsData } = useApp();
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [reportType, setReportType] = useState('all');
@@ -52,6 +52,23 @@ const Reports: React.FC = () => {
 
   const summary = generateSummary();
 
+  // Role'e göre veri filtreleme
+  const getFilteredDataByRole = () => {
+    if (user?.role === 'admin') {
+      // Admin tüm verileri görebilir
+      return { platformData, websiteData, newsData };
+    } else {
+      // Staff sadece kendi verilerini görebilir
+      return {
+        platformData: platformData.filter(d => d.enteredBy === user?.name),
+        websiteData: websiteData.filter(d => d.enteredBy === user?.name),
+        newsData: newsData.filter(d => d.enteredBy === user?.name)
+      };
+    }
+  };
+
+  const { platformData: roleFilteredPlatform, websiteData: roleFilteredWebsite, newsData: roleFilteredNews } = getFilteredDataByRole();
+
   // Zamanlama filtre fonksiyonu
   function isInRange(date: Date, start: string, end: string) {
     if (!start && !end) return true;
@@ -69,7 +86,7 @@ const Reports: React.FC = () => {
   }
 
   // Filtreleme fonksiyonu
-  const filteredPlatformData = platformData.filter((item) => {
+  const filteredPlatformData = roleFilteredPlatform.filter((item) => {
     const itemDate = getDate(item.enteredAt);
     if (reportType !== 'all' && reportType !== 'platform') return false;
     if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
@@ -96,7 +113,7 @@ const Reports: React.FC = () => {
     }
     return true;
   });
-  const filteredWebsiteData = websiteData.filter((item) => {
+  const filteredWebsiteData = roleFilteredWebsite.filter((item) => {
     const itemDate = getDate(item.enteredAt);
     if (reportType !== 'all' && reportType !== 'website') return false;
     if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
@@ -123,7 +140,7 @@ const Reports: React.FC = () => {
     }
     return true;
   });
-  const filteredNewsData = newsData.filter((item) => {
+  const filteredNewsData = roleFilteredNews.filter((item) => {
     const itemDate = getDate(item.enteredAt);
     if (reportType !== 'all' && reportType !== 'news') return false;
     if (selectedMonth && `${item.year}-${String(itemDate.getMonth() + 1).padStart(2, '0')}` !== selectedMonth) return false;
@@ -232,8 +249,15 @@ const Reports: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Raporlar & Analizler</h1>
-        <p className="text-gray-600">Verilerinizden kapsamlı raporlar oluşturun</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          {user?.role === 'admin' ? 'Raporlar & Analizler' : 'Raporlarım'}
+        </h1>
+        <p className="text-gray-600">
+          {user?.role === 'admin' 
+            ? 'Tüm verilerden kapsamlı raporlar oluşturun' 
+            : 'Kendi verilerinizden raporlar oluşturun'
+          }
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">

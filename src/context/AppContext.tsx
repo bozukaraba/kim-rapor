@@ -1,7 +1,68 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, PlatformData, WebsiteData, NewsData } from '../types';
-import { db } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { 
+  supabase, 
+  onAuthStateChange, 
+  getPlatformData, 
+  addPlatformData as supabaseAddPlatformData,
+  getWebsiteData,
+  addWebsiteData as supabaseAddWebsiteData,
+  getNewsData,
+  addNewsData as supabaseAddNewsData,
+  subscribeToPlatformData,
+  subscribeToWebsiteData,
+  subscribeToNewsData
+} from '../supabase';
+
+// Data transformation functions
+const convertSupabasePlatformData = (data: any[]): PlatformData[] => {
+  return data.map(item => ({
+    id: item.id,
+    platform: item.platform,
+    metrics: {
+      followers: item.metrics_followers || 0,
+      engagement: item.metrics_engagement || 0,
+      reach: item.metrics_reach || 0,
+      impressions: item.metrics_impressions || 0,
+      clicks: item.metrics_clicks || 0,
+      conversions: item.metrics_conversions || 0,
+    },
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
+
+const convertSupabaseWebsiteData = (data: any[]): WebsiteData[] => {
+  return data.map(item => ({
+    id: item.id,
+    visitors: item.visitors || 0,
+    pageViews: item.page_views || 0,
+    bounceRate: parseFloat(item.bounce_rate || '0'),
+    avgSessionDuration: parseFloat(item.avg_session_duration || '0'),
+    conversions: item.conversions || 0,
+    topPages: item.top_pages || [],
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
+
+const convertSupabaseNewsData = (data: any[]): NewsData[] => {
+  return data.map(item => ({
+    id: item.id,
+    mentions: item.mentions || 0,
+    sentiment: item.sentiment as 'positive' | 'neutral' | 'negative',
+    reach: item.reach || 0,
+    topSources: item.top_sources || [],
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
 
 interface AppContextType {
   user: User | null;
@@ -9,11 +70,15 @@ interface AppContextType {
   platformData: PlatformData[];
   websiteData: WebsiteData[];
   newsData: NewsData[];
-  addPlatformData: (data: Omit<PlatformData, 'id' | 'enteredAt'>) => void;
-  addWebsiteData: (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => void;
-  addNewsData: (data: Omit<NewsData, 'id' | 'enteredAt'>) => void;
+  addPlatformData: (data: Omit<PlatformData, 'id' | 'enteredAt'>) => Promise<void>;
+  addWebsiteData: (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => Promise<void>;
+  addNewsData: (data: Omit<NewsData, 'id' | 'enteredAt'>) => Promise<void>;
   currentView: 'dashboard' | 'entry' | 'reports';
   setCurrentView: (view: 'dashboard' | 'entry' | 'reports') => void;
+  isConnected: boolean;
+  lastUpdate: Date;
+  error: string | null;
+  supabaseUser: any;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -32,86 +97,145 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [websiteData, setWebsiteData] = useState<WebsiteData[]>([]);
   const [newsData, setNewsData] = useState<NewsData[]>([]);
   const [currentView, setCurrentView] = useState<'dashboard' | 'entry' | 'reports'>('dashboard');
+  const [isConnected, setIsConnected] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [error, setError] = useState<string | null>(null);
 
+  // Supabase Auth state listener
   useEffect(() => {
-    // Load data from localStorage on mount
-    const savedUser = localStorage.getItem('user');
-    const savedPlatformData = localStorage.getItem('platformData');
-    const savedWebsiteData = localStorage.getItem('websiteData');
-    const savedNewsData = localStorage.getItem('newsData');
+    // Mevcut session'ı kontrol et
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session); // Debug için
+      if (session?.user) {
+        console.log('User found:', session.user); // Debug için
+        setSupabaseUser(session.user);
+        setUser({
+          id: session.user.id,
+          name: session.user.user_metadata?.name || session.user.email || 'User',
+          email: session.user.email || '',
+          role: (session.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
+          department: session.user.user_metadata?.department || 'Genel'
+        });
+      } else {
+        console.log('No session found'); // Debug için
+      }
+    };
 
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    if (savedPlatformData) {
-      setPlatformData(JSON.parse(savedPlatformData));
-    }
-    if (savedWebsiteData) {
-      setWebsiteData(JSON.parse(savedWebsiteData));
-    }
-    if (savedNewsData) {
-      setNewsData(JSON.parse(savedNewsData));
-    }
+    checkSession();
+
+    const { data: { subscription } } = onAuthStateChange((event, session) => {
+      setSupabaseUser(session?.user || null);
+      if (session?.user) {
+        // Kullanıcı giriş yaptıysa user state'i güncelle
+        setUser({
+          id: session.user.id,
+          name: session.user.user_metadata?.name || session.user.email || 'User',
+          email: session.user.email || '',
+          role: (session.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
+          department: session.user.user_metadata?.department || 'Genel'
+        });
+      } else {
+        // Kullanıcı çıkış yaptıysa state'i temizle
+        setUser(null);
+        setPlatformData([]);
+        setWebsiteData([]);
+        setNewsData([]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Initial data load
   useEffect(() => {
-    localStorage.setItem('platformData', JSON.stringify(platformData));
-  }, [platformData]);
+    const loadInitialData = async () => {
+      try {
+        const [platformResult, websiteResult, newsResult] = await Promise.all([
+          getPlatformData(),
+          getWebsiteData(),
+          getNewsData()
+        ]);
 
-  useEffect(() => {
-    localStorage.setItem('websiteData', JSON.stringify(websiteData));
-  }, [websiteData]);
+        if (platformResult.error) throw platformResult.error;
+        if (websiteResult.error) throw websiteResult.error;
+        if (newsResult.error) throw newsResult.error;
 
-  useEffect(() => {
-    localStorage.setItem('newsData', JSON.stringify(newsData));
-  }, [newsData]);
+        setPlatformData(convertSupabasePlatformData(platformResult.data || []));
+        setWebsiteData(convertSupabaseWebsiteData(websiteResult.data || []));
+        setNewsData(convertSupabaseNewsData(newsResult.data || []));
+        
+        setLastUpdate(new Date());
+        setIsConnected(true);
+        setError(null);
+      } catch (error) {
+        console.error('Initial data load error:', error);
+        setIsConnected(false);
+        setError('Veri yüklenirken hata oluştu');
+      }
+    };
 
+    loadInitialData();
+  }, []);
+
+  // Real-time subscriptions
   useEffect(() => {
-    const unsubPlatform = onSnapshot(collection(db, 'platformData'), (snapshot) => {
-      setPlatformData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformData[]);
+    const platformSub = subscribeToPlatformData((payload) => {
+      console.log('Platform data changed:', payload);
+      // Veri değişikliği olduğunda yeniden yükle
+      getPlatformData().then(result => {
+        if (result.data) {
+          setPlatformData(convertSupabasePlatformData(result.data));
+          setLastUpdate(new Date());
+        }
+      });
     });
-    const unsubWebsite = onSnapshot(collection(db, 'websiteData'), (snapshot) => {
-      setWebsiteData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WebsiteData[]);
+
+    const websiteSub = subscribeToWebsiteData((payload) => {
+      console.log('Website data changed:', payload);
+      getWebsiteData().then(result => {
+        if (result.data) {
+          setWebsiteData(convertSupabaseWebsiteData(result.data));
+          setLastUpdate(new Date());
+        }
+      });
     });
-    const unsubNews = onSnapshot(collection(db, 'newsData'), (snapshot) => {
-      setNewsData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsData[]);
+
+    const newsSub = subscribeToNewsData((payload) => {
+      console.log('News data changed:', payload);
+      getNewsData().then(result => {
+        if (result.data) {
+          setNewsData(convertSupabaseNewsData(result.data));
+          setLastUpdate(new Date());
+        }
+      });
     });
+
     return () => {
-      unsubPlatform();
-      unsubWebsite();
-      unsubNews();
+      supabase.removeChannel(platformSub);
+      supabase.removeChannel(websiteSub);
+      supabase.removeChannel(newsSub);
     };
   }, []);
 
-  const addPlatformData = (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
-    const newData: PlatformData = {
-      ...data,
-      id: Date.now().toString(),
-      enteredAt: new Date(),
-    };
-    setPlatformData(prev => [...prev, newData]);
+  const addPlatformData = async (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
+    const { error } = await supabaseAddPlatformData(data);
+    if (error) throw error;
   };
 
-  const addWebsiteData = (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => {
-    const newData: WebsiteData = {
-      ...data,
-      id: Date.now().toString(),
-      enteredAt: new Date(),
-    };
-    setWebsiteData(prev => [...prev, newData]);
+  const addWebsiteData = async (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => {
+    const { error } = await supabaseAddWebsiteData(data);
+    if (error) throw error;
   };
 
-  const addNewsData = (data: Omit<NewsData, 'id' | 'enteredAt'>) => {
-    const newData: NewsData = {
-      ...data,
-      id: Date.now().toString(),
-      enteredAt: new Date(),
-    };
-    setNewsData(prev => [...prev, newData]);
+  const addNewsData = async (data: Omit<NewsData, 'id' | 'enteredAt'>) => {
+    const { error } = await supabaseAddNewsData(data);
+    if (error) throw error;
   };
 
   const value = {
@@ -125,6 +249,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     addNewsData,
     currentView,
     setCurrentView,
+    isConnected,
+    lastUpdate,
+    error,
+    supabaseUser
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

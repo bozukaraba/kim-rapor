@@ -1,13 +1,31 @@
-import React from 'react';
-import { TrendingUp, Users, Globe, MessageSquare, Calendar, ArrowUpRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Users, Globe, MessageSquare, Calendar, ArrowUpRight, Wifi, WifiOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import MetricCard from './MetricCard';
 import Chart from './Chart';
 
 const Dashboard: React.FC = () => {
-  const { platformData, websiteData, newsData } = useApp();
+  const { platformData, websiteData, newsData, isConnected, lastUpdate, error } = useApp();
+  const [loading, setLoading] = useState(false);
 
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Veri değişikliklerinde loading state'ini güncelle
+  useEffect(() => {
+    setLoading(false);
+  }, [platformData, websiteData, newsData]);
+
+  // Periyodik loading animasyonu (sadece görsel feedback)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (isConnected) {
+        setLoading(true);
+        setTimeout(() => setLoading(false), 500);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [isConnected]);
   
   const totalFollowers = platformData.reduce((sum, data) => sum + data.metrics.followers, 0);
   const totalEngagement = platformData.reduce((sum, data) => sum + data.metrics.engagement, 0);
@@ -53,12 +71,45 @@ const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel Genel Bakış</h1>
-        <div className="flex items-center space-x-2 text-gray-600">
-          <Calendar className="w-5 h-5" />
-          <span>{currentMonth}</span>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel Genel Bakış</h1>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <Calendar className="w-5 h-5" />
+              <span>{currentMonth}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
+               isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+             }`}>
+               {isConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
+               <span className={isConnected ? 'live-indicator' : ''}>
+                 {isConnected ? 'Canlı' : 'Bağlantı Kesildi'}
+               </span>
+             </div>
+            <div className="text-sm text-gray-500">
+              Son güncelleme: {lastUpdate.toLocaleTimeString('tr-TR')}
+            </div>
+            {loading && (
+               <div className="spinner h-6 w-6"></div>
+             )}
+          </div>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <WifiOff className="h-5 w-5 text-red-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard

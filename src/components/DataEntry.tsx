@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Save, Plus, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 const DataEntry: React.FC = () => {
   const { user, addPlatformData, addWebsiteData, addNewsData } = useApp();
@@ -43,16 +42,13 @@ const DataEntry: React.FC = () => {
 
   const handlePlatformSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
+    // Demo modu için user kontrolü kaldırıldı
+    // if (!user) return;
+    setLoading(true);
+    setSuccess(false);
     const [year, month] = platformForm.month.split('-');
     try {
-      await addDoc(collection(db, 'istatistikler'), {
-        platform: platformForm.platform,
-        value: Number(platformForm.followers),
-        createdAt: new Date(parseInt(year), parseInt(month) - 1),
-      });
-      addPlatformData({
+      await addPlatformData({
         platform: platformForm.platform,
         metrics: {
           followers: parseInt(platformForm.followers),
@@ -62,9 +58,9 @@ const DataEntry: React.FC = () => {
           clicks: parseInt(platformForm.clicks),
           conversions: parseInt(platformForm.conversions),
         },
-        month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
+        month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
         year: parseInt(year),
-        enteredBy: user.name,
+        enteredBy: user?.name || 'Demo User',
       });
       setPlatformForm({
         platform: '',
@@ -83,56 +79,70 @@ const DataEntry: React.FC = () => {
     setLoading(false);
   };
 
-  const handleWebsiteSubmit = (e: React.FormEvent) => {
+  const handleWebsiteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
+    // Demo modu için user kontrolü kaldırıldı
+    // if (!user) return;
+    setLoading(true);
+    setSuccess(false);
     const [year, month] = websiteForm.month.split('-');
-    addWebsiteData({
-      visitors: parseInt(websiteForm.visitors),
-      pageViews: parseInt(websiteForm.pageViews),
-      bounceRate: parseFloat(websiteForm.bounceRate),
-      avgSessionDuration: parseFloat(websiteForm.avgSessionDuration),
-      conversions: parseInt(websiteForm.conversions),
-      topPages: websiteForm.topPages.filter(page => page.trim() !== ''),
-      month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
-      year: parseInt(year),
-      enteredBy: user.name,
-    });
-
-    setWebsiteForm({
-      visitors: '',
-      pageViews: '',
-      bounceRate: '',
-      avgSessionDuration: '',
-      conversions: '',
-      topPages: [''],
-      month: new Date().toISOString().slice(0, 7),
-    });
+    try {
+      await addWebsiteData({
+        visitors: parseInt(websiteForm.visitors),
+        pageViews: parseInt(websiteForm.pageViews),
+        bounceRate: parseFloat(websiteForm.bounceRate),
+        avgSessionDuration: parseFloat(websiteForm.avgSessionDuration),
+        conversions: parseInt(websiteForm.conversions),
+        topPages: websiteForm.topPages.filter(page => page.trim() !== ''),
+        month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
+        year: parseInt(year),
+        enteredBy: user?.name || 'Demo User',
+      });
+      setWebsiteForm({
+        visitors: '',
+        pageViews: '',
+        bounceRate: '',
+        avgSessionDuration: '',
+        conversions: '',
+        topPages: [''],
+        month: new Date().toISOString().slice(0, 7),
+      });
+      setSuccess(true);
+    } catch (err) {
+      alert('Kayıt başarısız!');
+    }
+    setLoading(false);
   };
 
-  const handleNewsSubmit = (e: React.FormEvent) => {
+  const handleNewsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
+    // Demo modu için user kontrolü kaldırıldı
+    // if (!user) return;
+    setLoading(true);
+    setSuccess(false);
     const [year, month] = newsForm.month.split('-');
-    addNewsData({
-      mentions: parseInt(newsForm.mentions),
-      sentiment: newsForm.sentiment,
-      reach: parseInt(newsForm.reach),
-      topSources: newsForm.topSources.filter(source => source.trim() !== ''),
-      month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' }),
-      year: parseInt(year),
-      enteredBy: user.name,
-    });
-
-    setNewsForm({
-      mentions: '',
-      sentiment: 'neutral',
-      reach: '',
-      topSources: [''],
-      month: new Date().toISOString().slice(0, 7),
-    });
+    try {
+      await addNewsData({
+        mentions: parseInt(newsForm.mentions),
+        sentiment: newsForm.sentiment,
+        reach: parseInt(newsForm.reach),
+        topSources: newsForm.topSources.filter(source => source.trim() !== ''),
+        month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
+        year: parseInt(year),
+        enteredBy: user?.name || 'Demo User',
+      });
+      setNewsForm({
+        mentions: '',
+        sentiment: 'neutral',
+        reach: '',
+        topSources: [''],
+        month: new Date().toISOString().slice(0, 7),
+      });
+      setSuccess(true);
+    } catch (err) {
+      alert('Kayıt başarısız!');
+    }
+    setLoading(false);
   };
 
   const addTopPage = () => {
@@ -168,15 +178,21 @@ const DataEntry: React.FC = () => {
     setLoading(true);
     setSuccess(false);
     try {
-      await addDoc(collection(db, 'istatistikler'), {
-        platform,
-        value: Number(value),
-        createdAt: new Date(),
-      });
+      const { error } = await supabase
+        .from('statistics')
+        .insert([{
+          platform,
+          value: Number(value),
+          user_id: null
+        }]);
+      
+      if (error) throw error;
+      
       setSuccess(true);
       setPlatform('');
       setValue('');
     } catch (err) {
+      console.error('Save error:', err);
       alert('Kayıt başarısız!');
     }
     setLoading(false);

@@ -2,8 +2,10 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'analyst';
+  role: 'admin' | 'staff'; // Sadece admin ve staff rolleri
   department: string;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface PlatformData {
@@ -21,6 +23,7 @@ export interface PlatformData {
   year: number;
   enteredBy: string;
   enteredAt: Date;
+  userId?: string; // Hangi personelin girdiğini takip için
 }
 
 export interface WebsiteData {
@@ -35,6 +38,7 @@ export interface WebsiteData {
   year: number;
   enteredBy: string;
   enteredAt: Date;
+  userId?: string; // Hangi personelin girdiğini takip için
 }
 
 export interface NewsData {
@@ -47,6 +51,7 @@ export interface NewsData {
   year: number;
   enteredBy: string;
   enteredAt: Date;
+  userId?: string; // Hangi personelin girdiğini takip için
 }
 
 export interface ReportData {
@@ -55,4 +60,34 @@ export interface ReportData {
   newsData: NewsData[];
   generatedAt: Date;
   generatedBy: string;
+}
+
+// Admin için gelişmiş filtreleme
+export interface FilterOptions {
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  platforms: string[];
+  staff: string[];
+  departments: string[];
+  dataTypes: ('platform' | 'website' | 'news')[];
+}
+
+// Admin dashboard için özet bilgiler
+export interface AdminSummary {
+  totalEntries: number;
+  activeStaff: number;
+  thisMonthEntries: number;
+  topPerformingStaff: {
+    name: string;
+    entries: number;
+  }[];
+}
+
+// Staff dashboard için kısıtlı bilgiler
+export interface StaffSummary {
+  myEntries: number;
+  thisMonthEntries: number;
+  lastEntry: Date | null;
 }
