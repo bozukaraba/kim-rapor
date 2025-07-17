@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart3, Database, FileText, User, LogOut, Shield, Users, Home, Plus, TrendingUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import logo from '../loog.png';
 
 const Navbar: React.FC = () => {
   const { user, setUser, currentView, setCurrentView } = useApp();
@@ -67,18 +68,12 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                user.role === 'admin' 
-                  ? 'bg-gradient-to-br from-purple-600 to-blue-600' 
-                  : 'bg-gradient-to-br from-green-600 to-teal-600'
-              }`}>
-                {user.role === 'admin' ? (
-                  <Shield className="w-5 h-5 text-white" />
-                ) : (
-                  <BarChart3 className="w-5 h-5 text-white" />
-                )}
-              </div>
+            <div className="flex items-center space-x-3">
+              <img 
+                src={logo} 
+                alt="Kurumsal İletişim Müdürlüğü Logo" 
+                className="w-10 h-10 object-contain"
+              />
               <div>
                 <span className="text-xl font-bold text-gray-900">ReportHub</span>
                 <span className={`ml-2 text-xs px-2 py-1 rounded-full font-medium ${
