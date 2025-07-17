@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -45,9 +46,11 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
 

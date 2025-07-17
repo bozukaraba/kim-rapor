@@ -56,7 +56,20 @@ const Login: React.FC = () => {
           }
         );
         
-        if (error) throw error;
+        if (error) {
+          // Production-ready error handling
+          if (error.message.includes('Database error saving new user')) {
+            throw new Error('Kayıt sistemi geçici olarak kullanılamıyor. Lütfen demo hesapları kullanın veya daha sonra tekrar deneyin.');
+          } else if (error.message.includes('already registered')) {
+            throw new Error('Bu email adresi zaten kayıtlı. Giriş yapmayı deneyin.');
+          } else if (error.message.includes('password')) {
+            throw new Error('Şifre en az 6 karakter olmalı.');
+          } else if (error.message.includes('email')) {
+            throw new Error('Geçerli bir email adresi girin.');
+          } else {
+            throw new Error('Kayıt işlemi başarısız. Demo hesapları kullanabilirsiniz.');
+          }
+        }
         
         if (data.user) {
           const user = {
@@ -72,15 +85,24 @@ const Login: React.FC = () => {
         // Giriş yap
         const { data, error } = await signInWithEmail(formData.email, formData.password);
         
-        if (error) throw error;
+        if (error) {
+          // Production-ready error handling for login
+          if (error.message.includes('Invalid login credentials')) {
+            throw new Error('Email veya şifre hatalı.');
+          } else if (error.message.includes('Email not confirmed')) {
+            throw new Error('Email adresinizi onaylamanız gerekiyor.');
+          } else {
+            throw new Error('Giriş başarısız. Demo hesapları kullanabilirsiniz.');
+          }
+        }
         
         if (data.user) {
           const user = {
             id: data.user.id,
-            name: formData.name || data.user.email || 'Kullanıcı',
+            name: data.user.user_metadata?.name || data.user.email || 'Kullanıcı',
             email: data.user.email || formData.email,
-            role: formData.role,
-            department: formData.department || 'Genel'
+            role: (data.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
+            department: data.user.user_metadata?.department || 'Genel'
           };
           setUser(user);
         }
