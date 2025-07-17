@@ -14,6 +14,56 @@ import {
   subscribeToNewsData
 } from '../supabase';
 
+// Data transformation functions
+const convertSupabasePlatformData = (data: any[]): PlatformData[] => {
+  return data.map(item => ({
+    id: item.id,
+    platform: item.platform,
+    metrics: {
+      followers: item.metrics_followers || 0,
+      engagement: item.metrics_engagement || 0,
+      reach: item.metrics_reach || 0,
+      impressions: item.metrics_impressions || 0,
+      clicks: item.metrics_clicks || 0,
+      conversions: item.metrics_conversions || 0,
+    },
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
+
+const convertSupabaseWebsiteData = (data: any[]): WebsiteData[] => {
+  return data.map(item => ({
+    id: item.id,
+    visitors: item.visitors || 0,
+    pageViews: item.page_views || 0,
+    bounceRate: parseFloat(item.bounce_rate || '0'),
+    avgSessionDuration: parseFloat(item.avg_session_duration || '0'),
+    conversions: item.conversions || 0,
+    topPages: item.top_pages || [],
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
+
+const convertSupabaseNewsData = (data: any[]): NewsData[] => {
+  return data.map(item => ({
+    id: item.id,
+    mentions: item.mentions || 0,
+    sentiment: item.sentiment as 'positive' | 'neutral' | 'negative',
+    reach: item.reach || 0,
+    topSources: item.top_sources || [],
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
+
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -45,56 +95,6 @@ interface AppProviderProps {
   children: ReactNode;
 }
 
-// Supabase verisini TypeScript tipine dönüştürme fonksiyonları
-const convertSupabasePlatformData = (data: any[]): PlatformData[] => {
-  return data.map(item => ({
-    id: item.id,
-    platform: item.platform,
-    metrics: {
-      followers: item.metrics_followers || 0,
-      engagement: item.metrics_engagement || 0,
-      reach: item.metrics_reach || 0,
-      impressions: item.metrics_impressions || 0,
-      clicks: item.metrics_clicks || 0,
-      conversions: item.metrics_conversions || 0,
-    },
-    month: item.month,
-    year: item.year,
-    enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at)
-  }));
-};
-
-const convertSupabaseWebsiteData = (data: any[]): WebsiteData[] => {
-  return data.map(item => ({
-    id: item.id,
-    visitors: item.visitors,
-    pageViews: item.page_views,
-    bounceRate: item.bounce_rate,
-    avgSessionDuration: item.avg_session_duration,
-    conversions: item.conversions,
-    topPages: item.top_pages || [],
-    month: item.month,
-    year: item.year,
-    enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at)
-  }));
-};
-
-const convertSupabaseNewsData = (data: any[]): NewsData[] => {
-  return data.map(item => ({
-    id: item.id,
-    mentions: item.mentions,
-    sentiment: item.sentiment,
-    reach: item.reach,
-    topSources: item.top_sources || [],
-    month: item.month,
-    year: item.year,
-    enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at)
-  }));
-};
-
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<any>(null);
@@ -119,8 +119,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           id: session.user.id,
           name: session.user.user_metadata?.name || session.user.email || 'User',
           email: session.user.email || '',
-          role: 'analyst',
-          department: 'Digital Marketing'
+          role: (session.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
+          department: session.user.user_metadata?.department || 'Genel'
         });
       } else {
         console.log('No session found'); // Debug için
@@ -137,8 +137,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           id: session.user.id,
           name: session.user.user_metadata?.name || session.user.email || 'User',
           email: session.user.email || '',
-          role: 'analyst',
-          department: 'Digital Marketing'
+          role: (session.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
+          department: session.user.user_metadata?.department || 'Genel'
         });
       } else {
         // Kullanıcı çıkış yaptıysa state'i temizle

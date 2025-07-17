@@ -93,9 +93,10 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'platform_data' AND policyname = 'Anyone can read platform data') THEN
     ALTER TABLE public.platform_data ENABLE ROW LEVEL SECURITY;
     CREATE POLICY "Anyone can read platform data" ON public.platform_data FOR SELECT TO authenticated USING (true);
-    CREATE POLICY "Authenticated users can insert platform data" ON public.platform_data FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-    CREATE POLICY "Users can update their own platform data" ON public.platform_data FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-    CREATE POLICY "Users can delete their own platform data" ON public.platform_data FOR DELETE TO authenticated USING (auth.uid() = user_id);
+    -- Demo modu için geçici policy - user_id NULL olabilir
+    CREATE POLICY "Authenticated users can insert platform data" ON public.platform_data FOR INSERT TO authenticated WITH CHECK (true);
+    CREATE POLICY "Users can update their own platform data" ON public.platform_data FOR UPDATE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
+    CREATE POLICY "Users can delete their own platform data" ON public.platform_data FOR DELETE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
   END IF;
 END $$;
 
@@ -103,9 +104,10 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'website_data' AND policyname = 'Anyone can read website data') THEN
     ALTER TABLE public.website_data ENABLE ROW LEVEL SECURITY;
     CREATE POLICY "Anyone can read website data" ON public.website_data FOR SELECT TO authenticated USING (true);
-    CREATE POLICY "Authenticated users can insert website data" ON public.website_data FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-    CREATE POLICY "Users can update their own website data" ON public.website_data FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-    CREATE POLICY "Users can delete their own website data" ON public.website_data FOR DELETE TO authenticated USING (auth.uid() = user_id);
+    -- Demo modu için geçici policy - user_id NULL olabilir
+    CREATE POLICY "Authenticated users can insert website data" ON public.website_data FOR INSERT TO authenticated WITH CHECK (true);
+    CREATE POLICY "Users can update their own website data" ON public.website_data FOR UPDATE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
+    CREATE POLICY "Users can delete their own website data" ON public.website_data FOR DELETE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
   END IF;
 END $$;
 
@@ -113,9 +115,10 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'news_data' AND policyname = 'Anyone can read news data') THEN
     ALTER TABLE public.news_data ENABLE ROW LEVEL SECURITY;
     CREATE POLICY "Anyone can read news data" ON public.news_data FOR SELECT TO authenticated USING (true);
-    CREATE POLICY "Authenticated users can insert news data" ON public.news_data FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-    CREATE POLICY "Users can update their own news data" ON public.news_data FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-    CREATE POLICY "Users can delete their own news data" ON public.news_data FOR DELETE TO authenticated USING (auth.uid() = user_id);
+    -- Demo modu için geçici policy - user_id NULL olabilir
+    CREATE POLICY "Authenticated users can insert news data" ON public.news_data FOR INSERT TO authenticated WITH CHECK (true);
+    CREATE POLICY "Users can update their own news data" ON public.news_data FOR UPDATE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
+    CREATE POLICY "Users can delete their own news data" ON public.news_data FOR DELETE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
   END IF;
 END $$;
 
@@ -123,9 +126,10 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'statistics' AND policyname = 'Anyone can read statistics') THEN
     ALTER TABLE public.statistics ENABLE ROW LEVEL SECURITY;
     CREATE POLICY "Anyone can read statistics" ON public.statistics FOR SELECT TO authenticated USING (true);
-    CREATE POLICY "Authenticated users can insert statistics" ON public.statistics FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-    CREATE POLICY "Users can update their own statistics" ON public.statistics FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-    CREATE POLICY "Users can delete their own statistics" ON public.statistics FOR DELETE TO authenticated USING (auth.uid() = user_id);
+    -- Demo modu için geçici policy - user_id NULL olabilir
+    CREATE POLICY "Authenticated users can insert statistics" ON public.statistics FOR INSERT TO authenticated WITH CHECK (true);
+    CREATE POLICY "Users can update their own statistics" ON public.statistics FOR UPDATE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
+    CREATE POLICY "Users can delete their own statistics" ON public.statistics FOR DELETE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
   END IF;
 END $$;
 
@@ -133,9 +137,10 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'reports' AND policyname = 'Anyone can read reports') THEN
     ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
     CREATE POLICY "Anyone can read reports" ON public.reports FOR SELECT TO authenticated USING (true);
-    CREATE POLICY "Authenticated users can insert reports" ON public.reports FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-    CREATE POLICY "Users can update their own reports" ON public.reports FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-    CREATE POLICY "Users can delete their own reports" ON public.reports FOR DELETE TO authenticated USING (auth.uid() = user_id);
+    -- Demo modu için geçici policy - user_id NULL olabilir
+    CREATE POLICY "Authenticated users can insert reports" ON public.reports FOR INSERT TO authenticated WITH CHECK (true);
+    CREATE POLICY "Users can update their own reports" ON public.reports FOR UPDATE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
+    CREATE POLICY "Users can delete their own reports" ON public.reports FOR DELETE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
   END IF;
 END $$;
 
