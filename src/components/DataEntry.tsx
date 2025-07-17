@@ -693,13 +693,13 @@ const DataEntry: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Gelen Toplam Mail */}
+                {/* Gelen Toplam Mail Sayısı */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Gelen Toplam Mail
+                    Gelen Toplam Mail Sayısı
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={rpaIncomingMails}
                     onChange={(e) => setRpaIncomingMails(e.target.value)}
                     placeholder="örn: 1250"
@@ -707,60 +707,68 @@ const DataEntry: React.FC = () => {
                   />
                 </div>
 
-                {/* Toplam Dağıtılan */}
+                {/* Dağıtılan Mail Sayısı */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Toplam Dağıtılan
+                    Dağıtılan Mail Sayısı
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={rpaDistributed}
                     onChange={(e) => setRpaDistributed(e.target.value)}
                     placeholder="örn: 1180"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
+              </div>
 
-                {/* En Çok Yönlendirme Yapılan 1. Birim */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    En Çok Yönlendirme Yapılan 1. Birim
-                  </label>
-                  <input
-                    type="text"
-                    value={rpaUnit1}
-                    onChange={(e) => setRpaUnit1(e.target.value)}
-                    placeholder="örn: İnsan Kaynakları"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  />
-                </div>
+              {/* En Çok Dağıtılan İlk 3 Birim */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  En Çok Dağıtılan İlk 3 Birim
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* 1. Birim */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      1. Birim
+                    </label>
+                    <input
+                      type="text"
+                      value={rpaUnit1}
+                      onChange={(e) => setRpaUnit1(e.target.value)}
+                      placeholder="örn: İnsan Kaynakları"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
 
-                {/* En Çok Yönlendirme Yapılan 2. Birim */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    En Çok Yönlendirme Yapılan 2. Birim
-                  </label>
-                  <input
-                    type="text"
-                    value={rpaUnit2}
-                    onChange={(e) => setRpaUnit2(e.target.value)}
-                    placeholder="örn: Satış Departmanı"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  />
-                </div>
+                  {/* 2. Birim */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      2. Birim
+                    </label>
+                    <input
+                      type="text"
+                      value={rpaUnit2}
+                      onChange={(e) => setRpaUnit2(e.target.value)}
+                      placeholder="örn: Satış Departmanı"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
 
-                {/* En Çok Yönlendirme Yapılan 3. Birim */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    En Çok Yönlendirme Yapılan 3. Birim
-                  </label>
-                  <input
-                    type="text"
-                    value={rpaUnit3}
-                    onChange={(e) => setRpaUnit3(e.target.value)}
-                    placeholder="örn: Müşteri Hizmetleri"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  />
+                  {/* 3. Birim */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      3. Birim
+                    </label>
+                    <input
+                      type="text"
+                      value={rpaUnit3}
+                      onChange={(e) => setRpaUnit3(e.target.value)}
+                      placeholder="örn: Müşteri Hizmetleri"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
                 </div>
               </div>
 
