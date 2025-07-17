@@ -68,22 +68,12 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center">
               <img 
                 src={logo} 
                 alt="Kurumsal İletişim Müdürlüğü Logo" 
-                className="w-10 h-10 object-contain"
+                className="w-16 h-16 object-contain"
               />
-              <div>
-                <span className="text-xl font-bold text-gray-900">ReportHub</span>
-                <span className={`ml-2 text-xs px-2 py-1 rounded-full font-medium ${
-                  user.role === 'admin' 
-                    ? 'bg-purple-100 text-purple-700' 
-                    : 'bg-green-100 text-green-700'
-                }`}>
-                  {user.role === 'admin' ? 'Admin' : 'Personel'}
-                </span>
-              </div>
             </div>
             
             {/* Navigation Menu */}

@@ -684,9 +684,6 @@ const DataEntry: React.FC = () => {
                   <Mail className="w-5 h-5 text-orange-500" />
                   <span>RPA Rapor Verisi</span>
                 </h3>
-                <p className="text-gray-600 text-sm">
-                  RPA (Robotik Proses Otomasyonu) mail dağıtım verilerini girin
-                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -699,7 +696,6 @@ const DataEntry: React.FC = () => {
                     type="text"
                     value={rpaIncomingMails}
                     onChange={(e) => setRpaIncomingMails(e.target.value)}
-                    placeholder="örn: 1250"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
@@ -713,7 +709,6 @@ const DataEntry: React.FC = () => {
                     type="text"
                     value={rpaDistributed}
                     onChange={(e) => setRpaDistributed(e.target.value)}
-                    placeholder="örn: 1180"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
@@ -734,7 +729,6 @@ const DataEntry: React.FC = () => {
                       type="text"
                       value={rpaUnit1}
                       onChange={(e) => setRpaUnit1(e.target.value)}
-                      placeholder="örn: İnsan Kaynakları"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     />
                   </div>
@@ -748,7 +742,6 @@ const DataEntry: React.FC = () => {
                       type="text"
                       value={rpaUnit2}
                       onChange={(e) => setRpaUnit2(e.target.value)}
-                      placeholder="örn: Satış Departmanı"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     />
                   </div>
@@ -762,7 +755,6 @@ const DataEntry: React.FC = () => {
                       type="text"
                       value={rpaUnit3}
                       onChange={(e) => setRpaUnit3(e.target.value)}
-                      placeholder="örn: Müşteri Hizmetleri"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     />
                   </div>
