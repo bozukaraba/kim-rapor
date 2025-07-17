@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Save, Plus, X } from 'lucide-react';
+import { Save, Plus, X, Mail, CheckCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../supabase';
 
 const DataEntry: React.FC = () => {
-  const { user, addPlatformData, addWebsiteData, addNewsData } = useApp();
-  const [activeTab, setActiveTab] = useState<'platform' | 'website' | 'news'>('platform');
+  const { user, addPlatformData, addWebsiteData, addNewsData, addRPAData } = useApp();
+  const [activeTab, setActiveTab] = useState<'platform' | 'website' | 'news' | 'rpa'>('platform');
   const [platform, setPlatform] = useState('');
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,6 +39,13 @@ const DataEntry: React.FC = () => {
     topSources: [''],
     month: new Date().toISOString().slice(0, 7),
   });
+
+  // RPA states'leri ekleyelim:
+  const [rpaIncomingMails, setRpaIncomingMails] = useState('');
+  const [rpaDistributed, setRpaDistributed] = useState('');
+  const [rpaUnit1, setRpaUnit1] = useState('');
+  const [rpaUnit2, setRpaUnit2] = useState('');
+  const [rpaUnit3, setRpaUnit3] = useState('');
 
   const handlePlatformSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +152,45 @@ const DataEntry: React.FC = () => {
     setLoading(false);
   };
 
+  // RPA submit handler'ını ekleyelim:
+  const handleRPASubmit = async () => {
+    if (!rpaIncomingMails || !rpaDistributed || !rpaUnit1 || !rpaUnit2 || !rpaUnit3) {
+      return;
+    }
+
+    setLoading(true); // Use loading state for RPA submission
+    try {
+      const [year, month] = new Date().toISOString().slice(0, 7).split('-'); // Use current month for RPA
+      await addRPAData({
+        totalIncomingMails: parseInt(rpaIncomingMails),
+        totalDistributed: parseInt(rpaDistributed),
+        topRedirectedUnits: {
+          unit1: rpaUnit1,
+          unit2: rpaUnit2,
+          unit3: rpaUnit3
+        },
+        month: new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('tr-TR', { month: 'long' }),
+        year: parseInt(year),
+        enteredBy: user?.name || 'Unknown User',
+      });
+
+      // RPA form'u temizle
+      setRpaIncomingMails('');
+      setRpaDistributed('');
+      setRpaUnit1('');
+      setRpaUnit2('');
+      setRpaUnit3('');
+      
+      setSuccess(true); // Use success state for RPA
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      alert('RPA verisi kaydedilemedi!');
+      console.error('RPA data submission error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addTopPage = () => {
     setWebsiteForm({
       ...websiteForm,
@@ -237,6 +283,19 @@ const DataEntry: React.FC = () => {
               }`}
             >
               Haber Kapsamı
+            </button>
+            <button
+              onClick={() => setActiveTab('rpa')}
+              className={`flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 transition-colors ${
+                activeTab === 'rpa'
+                  ? 'border-orange-500 text-orange-600 bg-orange-50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <Mail className="w-4 h-4" />
+                <span>RPA Rapor</span>
+              </div>
             </button>
           </nav>
         </div>
@@ -618,6 +677,114 @@ const DataEntry: React.FC = () => {
                 </button>
               </div>
             </form>
+          )}
+
+          {/* RPA Form */}
+          {activeTab === 'rpa' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center space-x-2">
+                  <Mail className="w-5 h-5 text-orange-500" />
+                  <span>RPA Rapor Verisi</span>
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  RPA (Robotik Proses Otomasyonu) mail dağıtım verilerini girin
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Gelen Toplam Mail */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gelen Toplam Mail
+                  </label>
+                  <input
+                    type="number"
+                    value={rpaIncomingMails}
+                    onChange={(e) => setRpaIncomingMails(e.target.value)}
+                    placeholder="örn: 1250"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+
+                {/* Toplam Dağıtılan */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Toplam Dağıtılan
+                  </label>
+                  <input
+                    type="number"
+                    value={rpaDistributed}
+                    onChange={(e) => setRpaDistributed(e.target.value)}
+                    placeholder="örn: 1180"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+
+                {/* En Çok Yönlendirme Yapılan 1. Birim */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    En Çok Yönlendirme Yapılan 1. Birim
+                  </label>
+                  <input
+                    type="text"
+                    value={rpaUnit1}
+                    onChange={(e) => setRpaUnit1(e.target.value)}
+                    placeholder="örn: İnsan Kaynakları"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+
+                {/* En Çok Yönlendirme Yapılan 2. Birim */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    En Çok Yönlendirme Yapılan 2. Birim
+                  </label>
+                  <input
+                    type="text"
+                    value={rpaUnit2}
+                    onChange={(e) => setRpaUnit2(e.target.value)}
+                    placeholder="örn: Satış Departmanı"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+
+                {/* En Çok Yönlendirme Yapılan 3. Birim */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    En Çok Yönlendirme Yapılan 3. Birim
+                  </label>
+                  <input
+                    type="text"
+                    value={rpaUnit3}
+                    onChange={(e) => setRpaUnit3(e.target.value)}
+                    placeholder="örn: Müşteri Hizmetleri"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              {/* RPA Submit Button */}
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={handleRPASubmit}
+                  disabled={loading || !rpaIncomingMails || !rpaDistributed || !rpaUnit1 || !rpaUnit2 || !rpaUnit3}
+                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Kaydediliyor...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5" />
+                      <span>RPA Raporunu Kaydet</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
