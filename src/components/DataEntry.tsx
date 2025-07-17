@@ -286,16 +286,13 @@ const DataEntry: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('rpa')}
-              className={`flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 transition-colors ${
-                activeTab === 'rpa'
-                  ? 'border-orange-500 text-orange-600 bg-orange-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'rpa' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <div className="flex items-center justify-center space-x-2">
-                <Mail className="w-4 h-4" />
-                <span>RPA Rapor</span>
-              </div>
+              RPA Rapor
             </button>
           </nav>
         </div>
