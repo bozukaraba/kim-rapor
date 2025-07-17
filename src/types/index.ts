@@ -54,10 +54,27 @@ export interface NewsData {
   userId?: string; // Hangi personelin girdiğini takip için
 }
 
+export interface RPAData {
+  id: string;
+  totalIncomingMails: number; // Gelen Toplam Mail
+  totalDistributed: number; // Toplam Dağıtılan
+  topRedirectedUnits: {
+    unit1: string; // En Çok Yönlendirme Yapılan 1. Birim
+    unit2: string; // En Çok Yönlendirme Yapılan 2. Birim
+    unit3: string; // En Çok Yönlendirme Yapılan 3. Birim
+  };
+  month: string;
+  year: number;
+  enteredBy: string;
+  enteredAt: Date;
+  userId?: string; // Hangi personelin girdiğini takip için
+}
+
 export interface ReportData {
   platformData: PlatformData[];
   websiteData: WebsiteData[];
   newsData: NewsData[];
+  rpaData: RPAData[];
   generatedAt: Date;
   generatedBy: string;
 }
@@ -71,7 +88,7 @@ export interface FilterOptions {
   platforms: string[];
   staff: string[];
   departments: string[];
-  dataTypes: ('platform' | 'website' | 'news')[];
+  dataTypes: ('platform' | 'website' | 'news' | 'rpa')[];
 }
 
 // Admin dashboard için özet bilgiler

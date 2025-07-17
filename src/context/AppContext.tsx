@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, PlatformData, WebsiteData, NewsData } from '../types';
+import { User, PlatformData, WebsiteData, NewsData, RPAData } from '../types';
 import { 
   supabase, 
   onAuthStateChange, 
@@ -9,9 +9,12 @@ import {
   addWebsiteData as supabaseAddWebsiteData,
   getNewsData,
   addNewsData as supabaseAddNewsData,
+  getRPAData,
+  addRPAData as supabaseAddRPAData,
   subscribeToPlatformData,
   subscribeToWebsiteData,
-  subscribeToNewsData
+  subscribeToNewsData,
+  subscribeToRPAData
 } from '../supabase';
 
 // Data transformation functions
@@ -64,15 +67,34 @@ const convertSupabaseNewsData = (data: any[]): NewsData[] => {
   }));
 };
 
+const convertSupabaseRPAData = (data: any[]): RPAData[] => {
+  return data.map(item => ({
+    id: item.id,
+    totalIncomingMails: item.total_incoming_mails || 0,
+    totalDistributed: item.total_distributed || 0,
+    topRedirectedUnits: {
+      unit1: item.top_redirected_unit1 || '',
+      unit2: item.top_redirected_unit2 || '',
+      unit3: item.top_redirected_unit3 || '',
+    },
+    month: item.month,
+    year: item.year,
+    enteredBy: item.entered_by,
+    enteredAt: new Date(item.entered_at),
+  }));
+};
+
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   platformData: PlatformData[];
   websiteData: WebsiteData[];
   newsData: NewsData[];
+  rpaData: RPAData[];
   addPlatformData: (data: Omit<PlatformData, 'id' | 'enteredAt'>) => Promise<void>;
   addWebsiteData: (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => Promise<void>;
   addNewsData: (data: Omit<NewsData, 'id' | 'enteredAt'>) => Promise<void>;
+  addRPAData: (data: Omit<RPAData, 'id' | 'enteredAt'>) => Promise<void>;
   currentView: 'dashboard' | 'entry' | 'reports';
   setCurrentView: (view: 'dashboard' | 'entry' | 'reports') => void;
   isConnected: boolean;
@@ -101,6 +123,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [websiteData, setWebsiteData] = useState<WebsiteData[]>([]);
   const [newsData, setNewsData] = useState<NewsData[]>([]);
+  const [rpaData, setRpaData] = useState<RPAData[]>([]);
   const [currentView, setCurrentView] = useState<'dashboard' | 'entry' | 'reports'>('dashboard');
   const [isConnected, setIsConnected] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
@@ -146,6 +169,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setPlatformData([]);
         setWebsiteData([]);
         setNewsData([]);
+        setRpaData([]);
       }
     });
 
@@ -156,19 +180,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [platformResult, websiteResult, newsResult] = await Promise.all([
+        const [platformResult, websiteResult, newsResult, rpaResult] = await Promise.all([
           getPlatformData(),
           getWebsiteData(),
-          getNewsData()
+          getNewsData(),
+          getRPAData()
         ]);
 
         if (platformResult.error) throw platformResult.error;
         if (websiteResult.error) throw websiteResult.error;
         if (newsResult.error) throw newsResult.error;
+        if (rpaResult.error && !rpaResult.error.message.includes('does not exist')) throw rpaResult.error;
 
         setPlatformData(convertSupabasePlatformData(platformResult.data || []));
         setWebsiteData(convertSupabaseWebsiteData(websiteResult.data || []));
         setNewsData(convertSupabaseNewsData(newsResult.data || []));
+        setRpaData(convertSupabaseRPAData(rpaResult.data || []));
         
         setLastUpdate(new Date());
         setIsConnected(true);
@@ -216,10 +243,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       });
     });
 
+    const rpaSub = subscribeToRPAData((payload) => {
+      console.log('RPA data changed:', payload);
+      getRPAData().then(result => {
+        if (result.data) {
+          setRpaData(convertSupabaseRPAData(result.data));
+          setLastUpdate(new Date());
+        }
+      });
+    });
+
     return () => {
       supabase.removeChannel(platformSub);
       supabase.removeChannel(websiteSub);
       supabase.removeChannel(newsSub);
+      supabase.removeChannel(rpaSub);
     };
   }, []);
 
@@ -238,15 +276,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (error) throw error;
   };
 
+  const addRPAData = async (data: Omit<RPAData, 'id' | 'enteredAt'>) => {
+    const { error } = await supabaseAddRPAData(data);
+    if (error) throw error;
+  };
+
   const value = {
     user,
     setUser,
     platformData,
     websiteData,
     newsData,
+    rpaData,
     addPlatformData,
     addWebsiteData,
     addNewsData,
+    addRPAData,
     currentView,
     setCurrentView,
     isConnected,

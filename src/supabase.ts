@@ -161,4 +161,43 @@ export const subscribeToNewsData = (callback: (payload: any) => void) => {
       callback
     )
     .subscribe()
+}
+
+// RPA Data helper fonksiyonları
+export const getRPAData = async () => {
+  const { data, error } = await supabase
+    .from('rpa_data')
+    .select('*')
+    .order('entered_at', { ascending: false })
+  return { data, error }
+}
+
+export const addRPAData = async (rpaData: any) => {
+  // Mevcut kullanıcıyı al
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  const { data, error } = await supabase
+    .from('rpa_data')
+    .insert([{
+      total_incoming_mails: rpaData.totalIncomingMails,
+      total_distributed: rpaData.totalDistributed,
+      top_redirected_unit1: rpaData.topRedirectedUnits.unit1,
+      top_redirected_unit2: rpaData.topRedirectedUnits.unit2,
+      top_redirected_unit3: rpaData.topRedirectedUnits.unit3,
+      month: rpaData.month,
+      year: rpaData.year,
+      entered_by: rpaData.enteredBy,
+      user_id: user?.id || null
+    }])
+  return { data, error }
+}
+
+export const subscribeToRPAData = (callback: (payload: any) => void) => {
+  return supabase
+    .channel('rpa_data_changes')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: 'rpa_data' }, 
+      callback
+    )
+    .subscribe()
 } 
