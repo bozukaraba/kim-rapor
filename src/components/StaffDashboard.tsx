@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  TrendingUp, Users, Globe, MessageSquare, Calendar, ArrowUpRight, 
-  Wifi, WifiOff, Plus, FileText, Award, Clock, CheckCircle
+  TrendingUp, Users, Globe, MessageSquare, Calendar, Wifi, WifiOff, Plus, FileText
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import MetricCard from './MetricCard';
 import Chart from './Chart';
-import { StaffSummary } from '../types';
 
 const StaffDashboard: React.FC = () => {
   const { user, platformData, websiteData, newsData, isConnected, lastUpdate, error, setCurrentView } = useApp();
@@ -26,42 +24,6 @@ const StaffDashboard: React.FC = () => {
   };
 
   const { myPlatform, myWebsite, myNews } = getMyData();
-
-  // Personel özet bilgilerini hesapla
-  const generateStaffSummary = (): StaffSummary => {
-    const myEntries = myPlatform.length + myWebsite.length + myNews.length;
-    
-    // Bu ay ki girişler
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonthName = currentDate.toLocaleDateString('tr-TR', { month: 'long' });
-    
-    const thisMonthEntries = [
-      ...myPlatform.filter(d => d.year === currentYear && d.month === currentMonthName),
-      ...myWebsite.filter(d => d.year === currentYear && d.month === currentMonthName),
-      ...myNews.filter(d => d.year === currentYear && d.month === currentMonthName)
-    ].length;
-
-    // Son giriş tarihi
-    const allMyEntries = [...myPlatform, ...myWebsite, ...myNews];
-    const lastEntry = allMyEntries.length > 0 
-      ? allMyEntries.sort((a, b) => new Date(b.enteredAt).getTime() - new Date(a.enteredAt).getTime())[0]
-      : null;
-
-    return {
-      myEntries,
-      thisMonthEntries,
-      lastEntry: lastEntry ? new Date(lastEntry.enteredAt) : null
-    };
-  };
-
-  const staffSummary = generateStaffSummary();
-
-  // Kendi verilerinden hesaplamalar
-  const myTotalFollowers = myPlatform.reduce((sum, data) => sum + data.metrics.followers, 0);
-  const myTotalEngagement = myPlatform.reduce((sum, data) => sum + data.metrics.engagement, 0);
-  const myTotalVisitors = myWebsite.reduce((sum, data) => sum + data.visitors, 0);
-  const myTotalMentions = myNews.reduce((sum, data) => sum + data.mentions, 0);
 
   // Veri değişikliklerinde loading state'ini güncelle
   useEffect(() => {
@@ -98,9 +60,11 @@ const StaffDashboard: React.FC = () => {
 
   const monthlyChart = getMonthlyPerformance();
 
-  // Hedef belirleme (örnek olarak aylık 10 giriş)
-  const monthlyTarget = 10;
-  const targetProgress = Math.min((staffSummary.thisMonthEntries / monthlyTarget) * 100, 100);
+  // Kendi verilerinden hesaplamalar
+  const myTotalFollowers = myPlatform.reduce((sum, data) => sum + data.metrics.followers, 0);
+  const myTotalEngagement = myPlatform.reduce((sum, data) => sum + data.metrics.engagement, 0);
+  const myTotalVisitors = myWebsite.reduce((sum, data) => sum + data.visitors, 0);
+  const myTotalMentions = myNews.reduce((sum, data) => sum + data.mentions, 0);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -166,84 +130,31 @@ const StaffDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Özet Kartlar */}
+      {/* Basit Özet Kartlar */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
-          title="Toplam Girişlerim"
-          value={staffSummary.myEntries.toString()}
-          change={staffSummary.lastEntry ? `Son: ${staffSummary.lastEntry.toLocaleDateString('tr-TR')}` : 'Henüz giriş yok'}
-          icon={FileText}
-          color="blue"
-        />
-        <MetricCard
-          title="Bu Ay Girişlerim"
-          value={staffSummary.thisMonthEntries.toString()}
-          change={`Hedef: ${monthlyTarget}`}
-          icon={Clock}
-          color="green"
-        />
-        <MetricCard
-          title="Aylık Hedef"
-          value={`%${Math.round(targetProgress)}`}
-          change={`${staffSummary.thisMonthEntries}/${monthlyTarget} giriş`}
-          icon={Award}
-          color="purple"
-        />
-        <MetricCard
-          title="Performans"
-          value={targetProgress >= 100 ? "Mükemmel!" : targetProgress >= 70 ? "İyi" : "Geliştirebilir"}
-          change={targetProgress >= 100 ? "Hedefi aştı" : `${monthlyTarget - staffSummary.thisMonthEntries} giriş kaldı`}
-          icon={CheckCircle}
-          color="orange"
-        />
-      </div>
-
-      {/* Hedef İlerleme Çubuğu */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Aylık Hedef İlerlemesi</h3>
-          <span className="text-sm text-gray-500">{staffSummary.thisMonthEntries}/{monthlyTarget} giriş</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-          <div 
-            className={`h-4 rounded-full transition-all duration-500 ${
-              targetProgress >= 100 ? 'bg-green-500' : targetProgress >= 70 ? 'bg-blue-500' : 'bg-yellow-500'
-            }`}
-            style={{ width: `${Math.min(targetProgress, 100)}%` }}
-          ></div>
-        </div>
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>0</span>
-          <span className="font-medium">{Math.round(targetProgress)}% tamamlandı</span>
-          <span>{monthlyTarget}</span>
-        </div>
-      </div>
-
-      {/* Kişisel Metrikler */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <MetricCard
-          title="Benim Takipçi Verim"
+          title="Takipçi Verilerim"
           value={myTotalFollowers.toLocaleString()}
           change={`${myPlatform.length} platform girişi`}
           icon={Users}
           color="blue"
         />
         <MetricCard
-          title="Benim Etkileşim Verim"
+          title="Etkileşim Verilerim"
           value={myTotalEngagement.toLocaleString()}
           change={myTotalFollowers > 0 ? `%${((myTotalEngagement / myTotalFollowers) * 100).toFixed(1)} oran` : 'Veri yok'}
           icon={TrendingUp}
           color="purple"
         />
         <MetricCard
-          title="Benim Website Verim"
+          title="Website Verilerim"
           value={myTotalVisitors.toLocaleString()}
           change={`${myWebsite.length} website girişi`}
           icon={Globe}
           color="green"
         />
         <MetricCard
-          title="Benim Haber Verim"
+          title="Haber Verilerim"
           value={myTotalMentions.toLocaleString()}
           change={`${myNews.length} haber girişi`}
           icon={MessageSquare}
@@ -317,29 +228,6 @@ const StaffDashboard: React.FC = () => {
                 </button>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* İpuçları ve Yardım */}
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">💡 İpuçları</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
-          <div>
-            <p className="font-medium mb-1">🎯 Aylık hedefinizi takip edin</p>
-            <p>Düzenli veri girişi yaparak hedefinizi aşmaya çalışın</p>
-          </div>
-          <div>
-            <p className="font-medium mb-1">📊 Veri kalitesine dikkat edin</p>
-            <p>Doğru ve eksiksiz veriler daha iyi analizler sağlar</p>
-          </div>
-          <div>
-            <p className="font-medium mb-1">⏰ Zamanında giriş yapın</p>
-            <p>Verileri mümkün olduğunca güncel tutmaya çalışın</p>
-          </div>
-          <div>
-            <p className="font-medium mb-1">🔄 Tutarlı olun</p>
-            <p>Her ay düzenli veri girişi yaparak trend oluşturun</p>
           </div>
         </div>
       </div>

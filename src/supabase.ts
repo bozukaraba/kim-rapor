@@ -173,22 +173,36 @@ export const getRPAData = async () => {
 }
 
 export const addRPAData = async (rpaData: any) => {
+  console.log('🔍 RPA Data Input:', rpaData);
+  
   // Mevcut kullanıcıyı al
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('👤 Current User:', user);
+  
+  const insertData = {
+    total_incoming_mails: rpaData.totalIncomingMails,
+    total_distributed: rpaData.totalDistributed,
+    top_redirected_unit1: rpaData.topRedirectedUnits.unit1,
+    top_redirected_unit2: rpaData.topRedirectedUnits.unit2,
+    top_redirected_unit3: rpaData.topRedirectedUnits.unit3,
+    month: rpaData.month,
+    year: rpaData.year,
+    entered_by: rpaData.enteredBy,
+    user_id: user?.id || null
+  };
+  
+  console.log('📝 Insert Data:', insertData);
   
   const { data, error } = await supabase
     .from('rpa_data')
-    .insert([{
-      total_incoming_mails: rpaData.totalIncomingMails,
-      total_distributed: rpaData.totalDistributed,
-      top_redirected_unit1: rpaData.topRedirectedUnits.unit1,
-      top_redirected_unit2: rpaData.topRedirectedUnits.unit2,
-      top_redirected_unit3: rpaData.topRedirectedUnits.unit3,
-      month: rpaData.month,
-      year: rpaData.year,
-      entered_by: rpaData.enteredBy,
-      user_id: user?.id || null
-    }])
+    .insert([insertData])
+    
+  console.log('✅ Supabase Response:', { data, error });
+  
+  if (error) {
+    console.error('❌ RPA Data Insert Error:', error);
+  }
+  
   return { data, error }
 }
 

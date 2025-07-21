@@ -59,6 +59,21 @@ CREATE TABLE IF NOT EXISTS public.news_data (
   user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
 );
 
+-- RPA verileri tablosu (eğer yoksa oluştur) - EKSİK OLAN TABLO
+CREATE TABLE IF NOT EXISTS public.rpa_data (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  total_incoming_mails INTEGER NOT NULL DEFAULT 0,
+  total_distributed INTEGER NOT NULL DEFAULT 0,
+  top_redirected_unit1 TEXT NOT NULL,
+  top_redirected_unit2 TEXT NOT NULL,
+  top_redirected_unit3 TEXT NOT NULL,
+  month TEXT NOT NULL,
+  year INTEGER NOT NULL,
+  entered_by TEXT NOT NULL,
+  entered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) -- NULL olabilir (demo modu için)
+);
+
 -- Eski istatistikler tablosu (eğer yoksa oluştur)
 CREATE TABLE IF NOT EXISTS public.statistics (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -79,7 +94,7 @@ CREATE TABLE IF NOT EXISTS public.reports (
 );
 
 -- RLS (Row Level Security) politikaları - Demo modu için geçici olarak devre dışı
--- Gerçek production'da bu politikaları aktif edin
+-- Gerçek production'da bu politikaları aktiv edin
 
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Users can read their own data') THEN
@@ -119,6 +134,15 @@ DO $$ BEGIN
     CREATE POLICY "Authenticated users can insert news data" ON public.news_data FOR INSERT TO authenticated WITH CHECK (true);
     CREATE POLICY "Users can update their own news data" ON public.news_data FOR UPDATE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
     CREATE POLICY "Users can delete their own news data" ON public.news_data FOR DELETE TO authenticated USING (auth.uid() = user_id OR user_id IS NULL);
+  END IF;
+END $$;
+
+-- RPA verileri için politikalar (eğer yoksa oluştur)
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'rpa_data' AND policyname = 'Anyone can read RPA data') THEN
+    ALTER TABLE public.rpa_data ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Anyone can read RPA data" ON public.rpa_data FOR SELECT TO authenticated USING (true);
+    CREATE POLICY "Anyone can insert RPA data" ON public.rpa_data FOR INSERT TO authenticated WITH CHECK (true);
   END IF;
 END $$;
 
