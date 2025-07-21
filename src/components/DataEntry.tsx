@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { Save, Plus, X, Mail, CheckCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { supabase } from '../supabase';
 
 const DataEntry: React.FC = () => {
   const { user, addPlatformData, addWebsiteData, addNewsData, addRPAData } = useApp();
   const [activeTab, setActiveTab] = useState<'platform' | 'website' | 'news' | 'rpa'>('platform');
-  const [platform, setPlatform] = useState('');
-  const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -140,7 +137,7 @@ const DataEntry: React.FC = () => {
       });
       setNewsForm({
         mentions: '',
-        sentiment: 'neutral',
+        sentiment: 'neutral' as const,
         reach: '',
         topSources: [''],
         month: new Date().toISOString().slice(0, 7),
@@ -217,31 +214,6 @@ const DataEntry: React.FC = () => {
       ...newsForm,
       topSources: newsForm.topSources.filter((_, i) => i !== index)
     });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setSuccess(false);
-    try {
-      const { error } = await supabase
-        .from('statistics')
-        .insert([{
-          platform,
-          value: Number(value),
-          user_id: null
-        }]);
-      
-      if (error) throw error;
-      
-      setSuccess(true);
-      setPlatform('');
-      setValue('');
-    } catch (err) {
-      console.error('Save error:', err);
-      alert('Kayıt başarısız!');
-    }
-    setLoading(false);
   };
 
   return (
@@ -594,12 +566,10 @@ const DataEntry: React.FC = () => {
                     <option value="negative">Olumsuz</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Haber Bahsi
+                    Bahsedilme Sayısı
                   </label>
                   <input
                     type="number"
@@ -627,7 +597,7 @@ const DataEntry: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    En Popüler Kaynaklar
+                    En Önemli Haber Kaynakları
                   </label>
                   <button
                     type="button"
@@ -715,14 +685,11 @@ const DataEntry: React.FC = () => {
               </div>
 
               {/* En Çok Dağıtılan İlk 3 Birim */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  En Çok Dağıtılan İlk 3 Birim
-                </label>
+              <div className="mt-8">
+                <h4 className="text-md font-semibold text-gray-900 mb-4">En Çok Yönlendirme Yapılan Birimler</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* 1. Birim */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       1. Birim
                     </label>
                     <input
@@ -730,12 +697,11 @@ const DataEntry: React.FC = () => {
                       value={rpaUnit1}
                       onChange={(e) => setRpaUnit1(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="Birim adı"
                     />
                   </div>
-
-                  {/* 2. Birim */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       2. Birim
                     </label>
                     <input
@@ -743,12 +709,11 @@ const DataEntry: React.FC = () => {
                       value={rpaUnit2}
                       onChange={(e) => setRpaUnit2(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="Birim adı"
                     />
                   </div>
-
-                  {/* 3. Birim */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       3. Birim
                     </label>
                     <input
@@ -756,6 +721,7 @@ const DataEntry: React.FC = () => {
                       value={rpaUnit3}
                       onChange={(e) => setRpaUnit3(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="Birim adı"
                     />
                   </div>
                 </div>
@@ -785,33 +751,6 @@ const DataEntry: React.FC = () => {
           )}
         </div>
       </div>
-
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white rounded shadow mt-8">
-        <h2 className="text-xl font-bold mb-4">İstatistik Girişi</h2>
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Platform (örn: Instagram)"
-          value={platform}
-          onChange={e => setPlatform(e.target.value)}
-          required
-        />
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Değer (örn: 12345)"
-          type="number"
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded w-full"
-          disabled={loading}
-        >
-          {loading ? 'Kaydediliyor...' : 'Kaydet'}
-        </button>
-        {success && <div className="text-green-600 mt-2">Kayıt başarılı!</div>}
-      </form>
     </div>
   );
 };
