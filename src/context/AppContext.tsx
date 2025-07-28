@@ -1,24 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, PlatformData, WebsiteData, NewsData, RPAData } from '../types';
 import { 
-  supabase, 
+  auth,
   onAuthStateChange, 
   getPlatformData, 
-  addPlatformData as supabaseAddPlatformData,
+  addPlatformData as firebaseAddPlatformData,
   getWebsiteData,
-  addWebsiteData as supabaseAddWebsiteData,
+  addWebsiteData as firebaseAddWebsiteData,
   getNewsData,
-  addNewsData as supabaseAddNewsData,
+  addNewsData as firebaseAddNewsData,
   getRPAData,
-  addRPAData as supabaseAddRPAData,
+  addRPAData as firebaseAddRPAData,
   subscribeToPlatformData,
   subscribeToWebsiteData,
   subscribeToNewsData,
   subscribeToRPAData
-} from '../supabase';
+} from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // Data transformation functions
-const convertSupabasePlatformData = (data: any[]): PlatformData[] => {
+const convertFirebasePlatformData = (data: any[]): PlatformData[] => {
   return data.map(item => ({
     id: item.id,
     platform: item.platform,
@@ -33,11 +34,11 @@ const convertSupabasePlatformData = (data: any[]): PlatformData[] => {
     month: item.month,
     year: item.year,
     enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at),
+    enteredAt: item.enteredAt?.toDate ? item.enteredAt.toDate() : new Date(item.enteredAt),
   }));
 };
 
-const convertSupabaseWebsiteData = (data: any[]): WebsiteData[] => {
+const convertFirebaseWebsiteData = (data: any[]): WebsiteData[] => {
   return data.map(item => ({
     id: item.id,
     visitors: item.visitors || 0,
@@ -49,11 +50,11 @@ const convertSupabaseWebsiteData = (data: any[]): WebsiteData[] => {
     month: item.month,
     year: item.year,
     enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at),
+    enteredAt: item.enteredAt?.toDate ? item.enteredAt.toDate() : new Date(item.enteredAt),
   }));
 };
 
-const convertSupabaseNewsData = (data: any[]): NewsData[] => {
+const convertFirebaseNewsData = (data: any[]): NewsData[] => {
   return data.map(item => ({
     id: item.id,
     mentions: item.mentions || 0,
@@ -63,11 +64,11 @@ const convertSupabaseNewsData = (data: any[]): NewsData[] => {
     month: item.month,
     year: item.year,
     enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at),
+    enteredAt: item.enteredAt?.toDate ? item.enteredAt.toDate() : new Date(item.enteredAt),
   }));
 };
 
-const convertSupabaseRPAData = (data: any[]): RPAData[] => {
+const convertFirebaseRPAData = (data: any[]): RPAData[] => {
   return data.map(item => ({
     id: item.id,
     totalIncomingMails: item.total_incoming_mails || 0,
@@ -80,7 +81,7 @@ const convertSupabaseRPAData = (data: any[]): RPAData[] => {
     month: item.month,
     year: item.year,
     enteredBy: item.entered_by,
-    enteredAt: new Date(item.entered_at),
+    enteredAt: item.enteredAt?.toDate ? item.enteredAt.toDate() : new Date(item.enteredAt),
   }));
 };
 
@@ -100,7 +101,7 @@ interface AppContextType {
   isConnected: boolean;
   lastUpdate: Date;
   error: string | null;
-  supabaseUser: any;
+  firebaseUser: any;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -119,7 +120,7 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [websiteData, setWebsiteData] = useState<WebsiteData[]>([]);
   const [newsData, setNewsData] = useState<NewsData[]>([]);
@@ -129,42 +130,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [error, setError] = useState<string | null>(null);
 
-  // Supabase Auth state listener
+  // Firebase Auth state listener
   useEffect(() => {
-    // Mevcut session'ı kontrol et
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session); // Debug için
-      if (session?.user) {
-        console.log('User found:', session.user); // Debug için
-        setSupabaseUser(session.user);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      if (user) {
         setUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.name || session.user.email || 'User',
-          email: session.user.email || '',
-          role: (session.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
-          department: session.user.user_metadata?.department || 'Genel'
+          id: user.uid,
+          name: user.displayName || user.email || 'User',
+          email: user.email || '',
+          role: 'staff', // Default role, can be fetched from Firestore
+          department: 'Genel'
         });
       } else {
-        console.log('No session found'); // Debug için
-      }
-    };
-
-    checkSession();
-
-    const { data: { subscription } } = onAuthStateChange((event, session) => {
-      setSupabaseUser(session?.user || null);
-      if (session?.user) {
-        // Kullanıcı giriş yaptıysa user state'i güncelle
-        setUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.name || session.user.email || 'User',
-          email: session.user.email || '',
-          role: (session.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
-          department: session.user.user_metadata?.department || 'Genel'
-        });
-      } else {
-        // Kullanıcı çıkış yaptıysa state'i temizle
         setUser(null);
         setPlatformData([]);
         setWebsiteData([]);
@@ -173,7 +151,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   // Initial data load
@@ -190,12 +168,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         if (platformResult.error) throw platformResult.error;
         if (websiteResult.error) throw websiteResult.error;
         if (newsResult.error) throw newsResult.error;
-        if (rpaResult.error && !rpaResult.error.message.includes('does not exist')) throw rpaResult.error;
+        if (rpaResult.error) throw rpaResult.error;
 
-        setPlatformData(convertSupabasePlatformData(platformResult.data || []));
-        setWebsiteData(convertSupabaseWebsiteData(websiteResult.data || []));
-        setNewsData(convertSupabaseNewsData(newsResult.data || []));
-        setRpaData(convertSupabaseRPAData(rpaResult.data || []));
+        setPlatformData(convertFirebasePlatformData(platformResult.data || []));
+        setWebsiteData(convertFirebaseWebsiteData(websiteResult.data || []));
+        setNewsData(convertFirebaseNewsData(newsResult.data || []));
+        setRpaData(convertFirebaseRPAData(rpaResult.data || []));
         
         setLastUpdate(new Date());
         setIsConnected(true);
@@ -212,72 +190,71 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Real-time subscriptions
   useEffect(() => {
-    const platformSub = subscribeToPlatformData((payload) => {
+    const platformUnsubscribe = subscribeToPlatformData((payload) => {
       console.log('Platform data changed:', payload);
-      // Veri değişikliği olduğunda yeniden yükle
       getPlatformData().then(result => {
         if (result.data) {
-          setPlatformData(convertSupabasePlatformData(result.data));
+          setPlatformData(convertFirebasePlatformData(result.data));
           setLastUpdate(new Date());
         }
       });
     });
 
-    const websiteSub = subscribeToWebsiteData((payload) => {
+    const websiteUnsubscribe = subscribeToWebsiteData((payload) => {
       console.log('Website data changed:', payload);
       getWebsiteData().then(result => {
         if (result.data) {
-          setWebsiteData(convertSupabaseWebsiteData(result.data));
+          setWebsiteData(convertFirebaseWebsiteData(result.data));
           setLastUpdate(new Date());
         }
       });
     });
 
-    const newsSub = subscribeToNewsData((payload) => {
+    const newsUnsubscribe = subscribeToNewsData((payload) => {
       console.log('News data changed:', payload);
       getNewsData().then(result => {
         if (result.data) {
-          setNewsData(convertSupabaseNewsData(result.data));
+          setNewsData(convertFirebaseNewsData(result.data));
           setLastUpdate(new Date());
         }
       });
     });
 
-    const rpaSub = subscribeToRPAData((payload) => {
+    const rpaUnsubscribe = subscribeToRPAData((payload) => {
       console.log('RPA data changed:', payload);
       getRPAData().then(result => {
         if (result.data) {
-          setRpaData(convertSupabaseRPAData(result.data));
+          setRpaData(convertFirebaseRPAData(result.data));
           setLastUpdate(new Date());
         }
       });
     });
 
     return () => {
-      supabase.removeChannel(platformSub);
-      supabase.removeChannel(websiteSub);
-      supabase.removeChannel(newsSub);
-      supabase.removeChannel(rpaSub);
+      platformUnsubscribe();
+      websiteUnsubscribe();
+      newsUnsubscribe();
+      rpaUnsubscribe();
     };
   }, []);
 
   const addPlatformData = async (data: Omit<PlatformData, 'id' | 'enteredAt'>) => {
-    const { error } = await supabaseAddPlatformData(data);
+    const { error } = await firebaseAddPlatformData(data);
     if (error) throw error;
   };
 
   const addWebsiteData = async (data: Omit<WebsiteData, 'id' | 'enteredAt'>) => {
-    const { error } = await supabaseAddWebsiteData(data);
+    const { error } = await firebaseAddWebsiteData(data);
     if (error) throw error;
   };
 
   const addNewsData = async (data: Omit<NewsData, 'id' | 'enteredAt'>) => {
-    const { error } = await supabaseAddNewsData(data);
+    const { error } = await firebaseAddNewsData(data);
     if (error) throw error;
   };
 
   const addRPAData = async (data: Omit<RPAData, 'id' | 'enteredAt'>) => {
-    const { error } = await supabaseAddRPAData(data);
+    const { error } = await firebaseAddRPAData(data);
     if (error) throw error;
   };
 
@@ -297,7 +274,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     isConnected,
     lastUpdate,
     error,
-    supabaseUser
+    firebaseUser
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

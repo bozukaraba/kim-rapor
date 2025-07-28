@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Lock, Building, Shield, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { signInWithEmail, signUpWithEmail } from '../supabase';
+import { signInWithEmail, signUpWithEmail } from '../firebase';
 
 const Login: React.FC = () => {
   const { setUser } = useApp();
@@ -58,13 +58,11 @@ const Login: React.FC = () => {
         
         if (error) {
           // Production-ready error handling
-          if (error.message.includes('Database error saving new user')) {
-            throw new Error('Kayıt sistemi geçici olarak kullanılamıyor. Lütfen demo hesapları kullanın veya daha sonra tekrar deneyin.');
-          } else if (error.message.includes('already registered')) {
+          if (error.message.includes('email-already-in-use')) {
             throw new Error('Bu email adresi zaten kayıtlı. Giriş yapmayı deneyin.');
-          } else if (error.message.includes('password')) {
+          } else if (error.message.includes('weak-password')) {
             throw new Error('Şifre en az 6 karakter olmalı.');
-          } else if (error.message.includes('email')) {
+          } else if (error.message.includes('invalid-email')) {
             throw new Error('Geçerli bir email adresi girin.');
           } else {
             throw new Error('Kayıt işlemi başarısız. Demo hesapları kullanabilirsiniz.');
@@ -73,7 +71,7 @@ const Login: React.FC = () => {
         
         if (data.user) {
           const user = {
-            id: data.user.id,
+            id: data.user.uid,
             name: formData.name,
             email: formData.email,
             role: formData.role,
@@ -87,10 +85,10 @@ const Login: React.FC = () => {
         
         if (error) {
           // Production-ready error handling for login
-          if (error.message.includes('Invalid login credentials')) {
+          if (error.message.includes('user-not-found') || error.message.includes('wrong-password')) {
             throw new Error('Email veya şifre hatalı.');
-          } else if (error.message.includes('Email not confirmed')) {
-            throw new Error('Email adresinizi onaylamanız gerekiyor.');
+          } else if (error.message.includes('too-many-requests')) {
+            throw new Error('Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.');
           } else {
             throw new Error('Giriş başarısız. Demo hesapları kullanabilirsiniz.');
           }
@@ -98,11 +96,11 @@ const Login: React.FC = () => {
         
         if (data.user) {
           const user = {
-            id: data.user.id,
-            name: data.user.user_metadata?.name || data.user.email || 'Kullanıcı',
+            id: data.user.uid,
+            name: data.user.displayName || data.user.email || 'Kullanıcı',
             email: data.user.email || formData.email,
-            role: (data.user.user_metadata?.role as 'admin' | 'staff') || 'staff',
-            department: data.user.user_metadata?.department || 'Genel'
+            role: 'staff' as 'admin' | 'staff', // Default role, Firebase'de metadata farklı çalışır
+            department: 'Genel'
           };
           setUser(user);
         }
